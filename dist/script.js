@@ -35,12 +35,48 @@ document.querySelectorAll('[data-product]').forEach((button) => {
 
 const form = document.querySelector('#consult-form');
 const formMessage = form?.querySelector('.form-message');
+const zaloUrl = 'https://zalo.me/0946375566';
+
+const copyOrderDetails = (text) => {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  let copied = false;
+  try {
+    copied = document.execCommand('copy');
+  } catch (error) {
+    copied = false;
+  }
+  textarea.remove();
+
+  if (copied) return Promise.resolve(true);
+  if (!navigator.clipboard || !window.isSecureContext) return Promise.resolve(false);
+
+  return navigator.clipboard.writeText(text)
+    .then(() => true)
+    .catch(() => false);
+};
+
+const openZalo = () => {
+  const link = document.createElement('a');
+  link.href = zaloUrl;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+};
 
 document.querySelector('[data-order-channel="form"]')?.addEventListener('click', () => {
   window.setTimeout(() => form?.elements.name.focus(), 350);
 });
 
-form?.addEventListener('submit', (event) => {
+form?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const fields = [...form.querySelectorAll('[required]')];
   const emptyField = fields.find((field) => !field.value.trim());
@@ -52,15 +88,30 @@ form?.addEventListener('submit', (event) => {
     return;
   }
 
-  const phone = form.elements.phone.value.replace(/\s/g, '');
-  if (!/^(0|\+84)\d{9,10}$/.test(phone)) {
+  const phone = form.elements.phone.value.replace(/[\s.-]/g, '');
+  if (!/^(?:0\d{9}|\+84\d{9})$/.test(phone)) {
     formMessage.textContent = 'Số điện thoại chưa đúng định dạng. Vui lòng kiểm tra lại.';
     formMessage.className = 'form-message is-visible is-error';
     form.elements.phone.focus();
     return;
   }
 
-  formMessage.textContent = `Cảm ơn ${form.elements.name.value.trim()}! Yêu cầu đã được ghi nhận trên bản demo.`;
+  const orderDetails = [
+    'YÊU CẦU TƯ VẤN ENMEI',
+    `Họ và tên: ${form.elements.name.value.trim()}`,
+    `Số điện thoại/Zalo: ${phone}`,
+    `Đối tượng sử dụng: ${form.elements.age.value}`,
+    `Sản phẩm quan tâm: ${form.elements.need.value}`,
+    'Nguồn: www.enmei.asia',
+  ].join('\n');
+
+  const copyResult = copyOrderDetails(orderDetails);
+  openZalo();
+  const copied = await copyResult;
+
+  formMessage.textContent = copied
+    ? 'Đã sao chép thông tin và mở Zalo 0946 375 566. Hãy dán nội dung, kiểm tra và bấm Gửi để hoàn tất.'
+    : 'Zalo 0946 375 566 đã được mở. Trình duyệt chưa cho phép sao chép tự động; vui lòng gửi các thông tin vừa điền qua cửa sổ Zalo.';
   formMessage.className = 'form-message is-visible';
 });
 

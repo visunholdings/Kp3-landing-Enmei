@@ -6,7 +6,7 @@ Landing page giới thiệu ba sản phẩm dinh dưỡng Enmei:
 - Enmei Bone+
 - Enmei Diabetes
 
-Kênh tiếp nhận tư vấn/đơn hàng hiển thị trên trang: form, Zalo, Messenger và email.
+Kênh tiếp nhận tư vấn/đơn hàng hiển thị trên trang: form, Zalo, Messenger và email. Khi khách hoàn tất form, trang sẽ kiểm tra dữ liệu, tạo nội dung yêu cầu, sao chép nội dung và mở Zalo `0946375566` để khách dán, kiểm tra rồi gửi.
 
 ## Cấu trúc
 
