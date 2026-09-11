@@ -20,3 +20,7 @@ Mã nguồn website hoàn chỉnh nằm trong thư mục `dist/`:
 Có thể mở trực tiếp `dist/index.html` bằng trình duyệt hoặc chạy một static web server với thư mục xuất bản là `dist/`.
 
 Không cần cài đặt package hoặc chạy bước build.
+
+## Triển khai trên Vercel
+
+Repository đã có `vercel.json` khai báo `dist/` là thư mục xuất bản. Khi kết nối repository với Vercel, chọn Framework Preset là `Other` và không cần Build Command.
