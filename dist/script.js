@@ -24,12 +24,12 @@ document.querySelectorAll('.accordion__trigger').forEach((trigger) => {
   });
 });
 
-let quantity = 1;
-const quantityOutput = document.querySelector('#quantity');
-document.querySelectorAll('[data-action]').forEach((button) => {
+document.querySelectorAll('[data-product]').forEach((button) => {
   button.addEventListener('click', () => {
-    quantity = button.dataset.action === 'plus' ? Math.min(quantity + 1, 9) : Math.max(quantity - 1, 1);
-    quantityOutput.textContent = String(quantity);
+    const selectedProduct = button.dataset.product;
+    const productSelect = document.querySelector('select[name="need"]');
+    if (productSelect) productSelect.value = selectedProduct;
+    document.querySelector('#tu-van')?.scrollIntoView({ behavior: 'smooth' });
   });
 });
 
