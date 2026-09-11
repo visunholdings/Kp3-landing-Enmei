@@ -6,6 +6,8 @@ Landing page giới thiệu ba sản phẩm dinh dưỡng Enmei:
 - Enmei Bone+
 - Enmei Diabetes
 
+Kênh tiếp nhận tư vấn/đơn hàng hiển thị trên trang: form, Zalo, Messenger và email.
+
 ## Cấu trúc
 
 Mã nguồn website hoàn chỉnh nằm trong thư mục `dist/`:

@@ -35,6 +35,11 @@ document.querySelectorAll('[data-product]').forEach((button) => {
 
 const form = document.querySelector('#consult-form');
 const formMessage = form?.querySelector('.form-message');
+
+document.querySelector('[data-order-channel="form"]')?.addEventListener('click', () => {
+  window.setTimeout(() => form?.elements.name.focus(), 350);
+});
+
 form?.addEventListener('submit', (event) => {
   event.preventDefault();
   const fields = [...form.querySelectorAll('[required]')];
