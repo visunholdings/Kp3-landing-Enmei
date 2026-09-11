@@ -35,41 +35,13 @@ document.querySelectorAll('[data-product]').forEach((button) => {
 
 const form = document.querySelector('#consult-form');
 const formMessage = form?.querySelector('.form-message');
-const zaloUrl = 'https://zalo.me/0946375566';
+const formFields = form?.querySelector('.form-fields');
+const formSuccess = form?.querySelector('.form-success');
+const leadEndpoint = 'https://script.google.com/macros/s/AKfycbwUXxtV-t8P3TDleQKI5q-Sw15YVbyUDCL72-iilDwZhw44zQIJp8cXjA4VVhQgAEpugg/exec';
 
-const copyOrderDetails = (text) => {
-  const textarea = document.createElement('textarea');
-  textarea.value = text;
-  textarea.setAttribute('readonly', '');
-  textarea.style.position = 'fixed';
-  textarea.style.opacity = '0';
-  document.body.appendChild(textarea);
-  textarea.select();
-
-  let copied = false;
-  try {
-    copied = document.execCommand('copy');
-  } catch (error) {
-    copied = false;
-  }
-  textarea.remove();
-
-  if (copied) return Promise.resolve(true);
-  if (!navigator.clipboard || !window.isSecureContext) return Promise.resolve(false);
-
-  return navigator.clipboard.writeText(text)
-    .then(() => true)
-    .catch(() => false);
-};
-
-const openZalo = () => {
-  const link = document.createElement('a');
-  link.href = zaloUrl;
-  link.target = '_blank';
-  link.rel = 'noopener noreferrer';
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
+const createSubmissionId = () => {
+  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+  return `lead-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 };
 
 document.querySelector('[data-order-channel="form"]')?.addEventListener('click', () => {
@@ -78,6 +50,7 @@ document.querySelector('[data-order-channel="form"]')?.addEventListener('click',
 
 form?.addEventListener('submit', async (event) => {
   event.preventDefault();
+  const submitButton = form.querySelector('button[type="submit"]');
   const fields = [...form.querySelectorAll('[required]')];
   const emptyField = fields.find((field) => !field.value.trim());
 
@@ -96,23 +69,47 @@ form?.addEventListener('submit', async (event) => {
     return;
   }
 
-  const orderDetails = [
-    'YÊU CẦU TƯ VẤN ENMEI',
-    `Họ và tên: ${form.elements.name.value.trim()}`,
-    `Số điện thoại/Zalo: ${phone}`,
-    `Đối tượng sử dụng: ${form.elements.age.value}`,
-    `Sản phẩm quan tâm: ${form.elements.need.value}`,
-    'Nguồn: www.enmei.asia',
-  ].join('\n');
+  const params = new URLSearchParams(window.location.search);
+  const payload = {
+    submissionId: createSubmissionId(),
+    name: form.elements.name.value.trim(),
+    phone,
+    age: form.elements.age.value,
+    need: form.elements.need.value,
+    website: form.elements.website.value,
+    pageUrl: window.location.href,
+    referrer: document.referrer,
+    utmSource: params.get('utm_source') || '',
+    utmMedium: params.get('utm_medium') || '',
+    utmCampaign: params.get('utm_campaign') || '',
+  };
 
-  const copyResult = copyOrderDetails(orderDetails);
-  openZalo();
-  const copied = await copyResult;
+  if (payload.website) return;
 
-  formMessage.textContent = copied
-    ? 'Đã sao chép thông tin và mở Zalo 0946 375 566. Hãy dán nội dung, kiểm tra và bấm Gửi để hoàn tất.'
-    : 'Zalo 0946 375 566 đã được mở. Trình duyệt chưa cho phép sao chép tự động; vui lòng gửi các thông tin vừa điền qua cửa sổ Zalo.';
-  formMessage.className = 'form-message is-visible';
+  const originalButtonContent = submitButton.innerHTML;
+  submitButton.disabled = true;
+  submitButton.textContent = 'Đang gửi...';
+  formMessage.className = 'form-message';
+
+  try {
+    await fetch(leadEndpoint, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+    });
+
+    form.reset();
+    formFields.hidden = true;
+    formSuccess.hidden = false;
+    formSuccess.focus?.();
+  } catch (error) {
+    formMessage.textContent = 'Chưa gửi được thông tin. Vui lòng thử lại hoặc gọi 0946 375 566.';
+    formMessage.className = 'form-message is-visible is-error';
+  } finally {
+    submitButton.disabled = false;
+    submitButton.innerHTML = originalButtonContent;
+  }
 });
 
 const observer = new IntersectionObserver((entries) => {
