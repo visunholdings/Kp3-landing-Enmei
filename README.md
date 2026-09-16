@@ -6,7 +6,7 @@ Landing page giới thiệu ba sản phẩm dinh dưỡng Enmei:
 - Enmei Bone+
 - Enmei Diabetes
 
-Kênh tiếp nhận tư vấn/đơn hàng hiển thị trên trang: form, Messenger và email. Khi khách hoàn tất form, trang kiểm tra dữ liệu, lưu lead cùng nguồn UTM vào Google Sheets và gửi email chi tiết tới `infor.visun@gmail.com`; khách không bị chuyển sang ứng dụng khác. Gửi thành công sẽ thay toàn bộ form bằng lời xác nhận Enmei sẽ liên hệ trong vòng 24 giờ.
+Kênh tiếp nhận tư vấn/đơn hàng hiển thị trên trang: form, Messenger và email. Form khảo sát gồm 5 câu ngắn: tên, số điện thoại/Zalo, mua cho bản thân hay người thân, mối quan tâm chính và kinh nghiệm dùng sữa công thức cho người cần kiểm soát đường huyết. Khi khách hoàn tất form, trang kiểm tra dữ liệu, lưu lead cùng nguồn UTM vào Google Sheets và gửi email chi tiết tới `infor.visun@gmail.com`; khách không bị chuyển sang ứng dụng khác. Gửi thành công sẽ thay toàn bộ form bằng lời xác nhận Enmei sẽ liên hệ trong vòng 24 giờ.
 
 ## Cấu trúc
 

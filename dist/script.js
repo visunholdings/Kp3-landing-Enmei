@@ -26,9 +26,6 @@ document.querySelectorAll('.accordion__trigger').forEach((trigger) => {
 
 document.querySelectorAll('[data-product]').forEach((button) => {
   button.addEventListener('click', () => {
-    const selectedProduct = button.dataset.product;
-    const productSelect = document.querySelector('select[name="need"]');
-    if (productSelect) productSelect.value = selectedProduct;
     document.querySelector('#tu-van')?.scrollIntoView({ behavior: 'smooth' });
   });
 });
@@ -70,12 +67,19 @@ form?.addEventListener('submit', async (event) => {
   }
 
   const params = new URLSearchParams(window.location.search);
+  const buyer = form.elements.buyer.value;
+  const need = form.elements.need.value;
+  const usedBefore = form.elements.usedBefore.value;
   const payload = {
     submissionId: createSubmissionId(),
     name: form.elements.name.value.trim(),
     phone,
-    age: form.elements.age.value,
-    need: form.elements.need.value,
+    buyer,
+    need,
+    usedBefore,
+    // Giữ dữ liệu đọc được trong cấu trúc lead cũ, đồng thời gửi các trường mới ở trên.
+    age: `Mua cho: ${buyer}`,
+    surveyNeed: `${need}; Đã từng dùng: ${usedBefore}`,
     website: form.elements.website.value,
     pageUrl: window.location.href,
     referrer: document.referrer,

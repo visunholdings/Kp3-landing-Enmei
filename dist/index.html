@@ -395,39 +395,41 @@
         <form class="consult-form reveal reveal--delay" id="consult-form" novalidate>
           <div class="form-fields">
             <div class="form-heading">
-              <span>ĐĂNG KÝ TƯ VẤN</span>
-              <strong>Chúng tôi có thể giúp gì cho bạn?</strong>
+              <span>KHẢO SÁT NHU CẦU</span>
+              <strong>Trả lời nhanh 5 câu để nhận tư vấn phù hợp</strong>
             </div>
-            <label>Họ và tên
+            <label>Anh/chị tên là gì?
               <input type="text" name="name" autocomplete="name" placeholder="Ví dụ: Nguyễn Minh Anh" required />
             </label>
-            <label>Số điện thoại
+            <label>Số điện thoại/Zalo để nhận tư vấn là gì?
               <input type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="Ví dụ: 09xx xxx xxx" required />
             </label>
             <label class="form-honeypot" aria-hidden="true">Không điền trường này
               <input type="text" name="website" tabindex="-1" autocomplete="off" />
             </label>
-            <div class="form-row">
-              <label>Đối tượng sử dụng
-                <select name="age" required>
-                  <option value="">Chọn đối tượng</option>
-                  <option>Người lớn tuổi</option>
-                  <option>Người cần hỗ trợ xương khớp</option>
-                  <option>Người cần kiểm soát đường huyết</option>
-                  <option>Đối tượng khác</option>
-                </select>
-              </label>
-              <label>Sản phẩm quan tâm
-                <select name="need" required>
-                  <option value="">Chọn sản phẩm</option>
-                  <option value="Enmei Gold Elder">Enmei Gold Elder</option>
-                  <option value="Enmei Bone+">Enmei Bone+</option>
-                  <option value="Enmei Diabetes">Enmei Diabetes</option>
-                  <option value="Chưa xác định">Chưa biết nên chọn loại nào</option>
-                </select>
-              </label>
-            </div>
-            <button class="button button--primary button--full" type="submit">Gửi yêu cầu tư vấn <span aria-hidden="true">→</span></button>
+            <label>Anh/chị mua cho bản thân hay người thân?
+              <select name="buyer" required>
+                <option value="">Chọn câu trả lời</option>
+                <option>Bản thân</option>
+                <option>Người thân</option>
+              </select>
+            </label>
+            <label>Anh/chị đang quan tâm nhất đến điều gì?
+              <select name="need" required>
+                <option value="">Chọn mối quan tâm</option>
+                <option>Hỗ trợ kiểm soát đường huyết</option>
+                <option>Dinh dưỡng</option>
+                <option>Dễ uống</option>
+              </select>
+            </label>
+            <label>Anh/chị đã từng dùng sữa công thức dành cho người cần kiểm soát đường huyết chưa?
+              <select name="usedBefore" required>
+                <option value="">Chọn câu trả lời</option>
+                <option>Đã từng dùng</option>
+                <option>Chưa từng dùng</option>
+              </select>
+            </label>
+            <button class="button button--primary button--full" type="submit">Gửi khảo sát để nhận tư vấn <span aria-hidden="true">→</span></button>
             <p class="form-disclaimer">Bằng việc gửi thông tin, bạn đồng ý để Enmei liên hệ về yêu cầu này.</p>
             <div class="form-message" role="status" aria-live="polite"></div>
           </div>
