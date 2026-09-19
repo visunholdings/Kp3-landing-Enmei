@@ -4,6 +4,8 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/thanh-toan", "destination": "/thanh-toan.html" },
-    { "source": "/admin", "destination": "/admin.html" }
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/mailbox", "destination": "/mailbox.html" },
+    { "source": "/email-sequence", "destination": "/view-email-sequence.html" }
   ]
 }

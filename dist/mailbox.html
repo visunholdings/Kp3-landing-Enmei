@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hộp Thư Đến (Inbox) — hungtrinhth@gmail.com</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: #f6f8fc;
+      color: #1f1f1f;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Topbar Gmail */
+    .topbar {
+      background: #fff;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #e0e4e9;
+      height: 64px;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .logo-gmail {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #444746;
+    }
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: #ea4335;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+    }
+    .search-box {
+      background: #eaf1fb;
+      border-radius: 28px;
+      padding: 10px 24px;
+      width: 580px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #444746;
+      font-size: 0.95rem;
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .account-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: #f1f3f4;
+      font-size: 0.88rem;
+      font-weight: 500;
+    }
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #0284c7;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    /* Main Container */
+    .main-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background: #f6f8fc;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .btn-compose {
+      background: #c2e7ff;
+      color: #001d35;
+      padding: 14px 22px;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      width: fit-content;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      cursor: pointer;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-radius: 24px;
+      font-size: 0.9rem;
+      color: #444746;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .nav-item.is-active {
+      background: #d3e3fd;
+      color: #041e49;
+      font-weight: 700;
+    }
+
+    /* Content Area */
+    .content-area {
+      flex: 1;
+      background: #fff;
+      border-radius: 16px;
+      margin: 8px 12px 12px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Email List View */
+    .email-list-view {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .email-list-toolbar {
+      padding: 12px 18px;
+      border-bottom: 1px solid #f1f3f4;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.88rem;
+      color: #5f6368;
+    }
+    .email-item {
+      display: grid;
+      grid-template-columns: 36px 220px 1fr 140px;
+      align-items: center;
+      padding: 14px 18px;
+      border-bottom: 1px solid #f2f2f2;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.15s;
+    }
+    .email-item:hover {
+      box-shadow: inset 1px 0 0 #dadce0, inset -1px 0 0 #dadce0, 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+      background: #fbfbfb;
+      z-index: 1;
+    }
+    .email-item.is-unread {
+      background: #ffffff;
+      font-weight: 700;
+      color: #202124;
+    }
+    .email-item.is-unread .sender {
+      color: #202124;
+    }
+    .domain-tag {
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+    .tag-trans {
+      background: #dcfce7;
+      color: #15803d;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+
+    /* Email Detail View */
+    .email-detail-view {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      overflow-y: auto;
+      padding: 24px 32px;
+    }
+    .detail-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e0e4e9;
+    }
+    .btn-back {
+      border: none;
+      background: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      color: #063b80;
+      font-weight: 600;
+    }
+    .detail-subject {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #1f1f1f;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sender-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #f1f3f4;
+    }
+    .sender-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .sender-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #063b80;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .email-container-box {
+      max-width: 680px;
+      margin: 0 auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="logo-gmail">
+        <div class="logo-icon">M</div>
+        <span>Gmail</span>
+      </div>
+    </div>
+    <div class="search-box">
+      <span>🔍</span>
+      <span>from:cskh@enmei.asia</span>
+    </div>
+    <div class="topbar-right">
+      <div class="account-chip">
+        <div class="avatar">H</div>
+        <span>Trịnh Minh Hùng (hungtrinhth@gmail.com)</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Body -->
+  <div class="main-body">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="btn-compose">
+        <span>✏️</span> Soạn thư
+      </div>
+      <div class="nav-item is-active" onclick="showListView()">
+        <span>📥 Hộp thư đến</span>
+        <strong style="color:#063b80;">4</strong>
+      </div>
+      <div class="nav-item">
+        <span>⭐ Đã gắn dấu sao</span>
+      </div>
+      <div class="nav-item">
+        <span>⏰ Đã tạm ẩn</span>
+      </div>
+      <div class="nav-item">
+        <span>📤 Đã gửi</span>
+      </div>
+      <div class="nav-item">
+        <span>📄 Thư nháp</span>
+      </div>
+    </aside>
+
+    <!-- Content Area -->
+    <main class="content-area">
+      <!-- 1. Danh sách thư (Inbox View) -->
+      <div id="email-list-view" class="email-list-view">
+        <div class="email-list-toolbar">
+          <div>
+            <span style="font-weight:600; color:#1f1f1f;">Hộp thư đến</span> (4 thư từ domain riêng <code>cskh@enmei.asia</code>)
+          </div>
+          <div>1–4 trong 4</div>
+        </div>
+
+        <!-- Item 1: Transactional Email Xác nhận đơn hàng -->
+        <div class="email-item is-unread" onclick="openEmail('trans')">
+          <div>⭐</div>
+          <div class="sender">
+            <span class="tag-trans">Xác nhận đơn</span>
+            <strong>Enmei Order</strong>
+          </div>
+          <div>
+            <span style="font-weight:700;">[Enmei] Xác nhận đơn hàng thành công #ENM7341 — Cảm ơn bạn! 🎉</span> — Kính gửi quý khách Reviewer KP3 (Test), đơn hàng của bạn đã thanh toán thành công...
+          </div>
+          <div style="text-align:right; font-size:0.85rem; color:#444746;">19:43 (35 phút trước)</div>
+        </div>
+
+        <!-- Item 2: Sequence 3 - Offer -->
+        <div class="email-item is-unread" onclick="openEmail('seq3')">
+          <div>⭐</div>
+          <div class="sender">
+            <span class="domain-tag">Sequence 3</span>
+            <strong>Enmei Dinh Dưỡng</strong>
+          </div>
+          <div>
+            <span style="font-weight:700;">[Enmei] Dành riêng cho bạn: Món quà trải nghiệm Sữa Hạt Enmei êm bụng &amp; Link thanh toán VietQR 🎁</span> — Ưu đãi giảm 20% + Tặng bình lắc cao cấp...
+          </div>
+          <div style="text-align:right; font-size:0.85rem; color:#444746;">19:43 (35 phút trước)</div>
+        </div>
+
+        <!-- Item 3: Sequence 2 - Nurture -->
+        <div class="email-item is-unread" onclick="openEmail('seq2')">
+          <div>⭐</div>
+          <div class="sender">
+            <span class="domain-tag">Sequence 2</span>
+            <strong>Trịnh Minh Hùng</strong>
+          </div>
+          <div>
+            <span style="font-weight:700;">[Enmei] Vì sao người lớn tuổi uống sữa hay bị đầy bụng, khó tiêu? Góc nhìn khoa học 💡</span> — Hơn 85% người trưởng thành châu Á thiếu men lactase tự nhiên...
+          </div>
+          <div style="text-align:right; font-size:0.85rem; color:#444746;">19:43 (35 phút trước)</div>
+        </div>
+
+        <!-- Item 4: Sequence 1 - Welcome -->
+        <div class="email-item is-unread" onclick="openEmail('seq1')">
+          <div>⭐</div>
+          <div class="sender">
+            <span class="domain-tag">Sequence 1</span>
+            <strong>Enmei Dinh Dưỡng</strong>
+          </div>
+          <div>
+            <span style="font-weight:700;">[Enmei] Chào mừng bạn đến với Enmei — Lời cảm ơn và bí quyết êm bụng mỗi ngày 🌿</span> — Cảm ơn bạn đã tin tưởng khảo sát nhu cầu dinh dưỡng...
+          </div>
+          <div style="text-align:right; font-size:0.85rem; color:#444746;">19:43 (35 phút trước)</div>
+        </div>
+      </div>
+
+      <!-- 2. Chi tiết thư (Detail View) -->
+      <div id="email-detail-view" class="email-detail-view">
+        <div class="detail-toolbar">
+          <button class="btn-back" onclick="showListView()">← Quay lại Hộp thư đến</button>
+        </div>
+
+        <div class="detail-subject" id="view-subject">Tiêu đề email</div>
+
+        <div class="sender-card">
+          <div class="sender-meta">
+            <div class="sender-avatar" id="view-avatar">E</div>
+            <div>
+              <div style="font-size:1rem; font-weight:700;" id="view-sender-name">Enmei Order</div>
+              <div style="font-size:0.85rem; color:#5f6368;">
+                Từ: <strong id="view-from-addr" style="color:#063b80;">cskh@enmei.asia</strong> | Đến: <strong>hungtrinhth@gmail.com</strong>
+                <span style="display:inline-block; margin-left:8px; background:#dcfce7; color:#166534; font-size:0.75rem; padding:2px 6px; border-radius:4px; font-weight:600;">✓ Đã xác thực SPF/DKIM enmei.asia</span>
+              </div>
+            </div>
+          </div>
+          <div style="font-size:0.85rem; color:#5f6368;" id="view-time">19:43 (Hôm nay)</div>
+        </div>
+
+        <!-- Email Body HTML Container -->
+        <div class="email-container-box" id="view-body-html">
+          <!-- Dynamic Email HTML -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const EMAILS = {
+      trans: {
+        subject: '[Enmei] Xác nhận đơn hàng thành công #ENM7341 — Cảm ơn bạn! 🎉',
+        senderName: 'Enmei Order (Sepay Payment OS)',
+        fromAddr: 'cskh@enmei.asia',
+        avatar: '✓',
+        time: '19:43 (Hôm nay, 19 Th09, 2026)',
+        html: `
+          <div style="font-family:'Helvetica Neue', Arial, sans-serif; padding:32px 28px; line-height:1.6; color:#1e293b;">
+            <div style="text-align:center; padding-bottom:20px; border-bottom:1px solid #e2e8f0;">
+              <div style="display:inline-block; background:#10b981; color:#fff; width:52px; height:52px; border-radius:50%; font-size:1.8rem; line-height:52px; margin-bottom:10px;">✓</div>
+              <h2 style="color:#063b80; font-size:1.5rem; margin:0;">XÁC NHẬN ĐƠN HÀNG THÀNH CÔNG</h2>
+              <p style="color:#64748b; font-size:0.9rem; margin-top:4px;">Cổng thanh toán tự động VietQR Sepay • Enmei Nutrition</p>
+            </div>
+
+            <div style="padding:24px 0;">
+              <p>Kính gửi quý khách <strong>Reviewer KP3 (Trịnh Minh Hùng)</strong>,</p>
+              <p>Hệ thống Enmei xin trân trọng thông báo: Giao dịch thanh toán cho đơn hàng của bạn đã được xác nhận thành công qua ngân hàng Techcombank!</p>
+
+              <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:18px; margin:20px 0;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                  <span style="color:#64748b;">Mã đơn hàng:</span>
+                  <strong style="color:#063b80; font-size:1.1rem;">#ENM7341</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                  <span style="color:#64748b;">Sản phẩm:</span>
+                  <strong>Cẩm Nang Dinh Dưỡng Đường Huyết 14 Ngày (Ebook PDF)</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                  <span style="color:#64748b;">Số tiền thanh toán:</span>
+                  <strong style="color:#10b981; font-size:1.2rem;">2.000 VNĐ</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                  <span style="color:#64748b;">Phương thức:</span>
+                  <span>Chuyển khoản VietQR SePay (Techcombank)</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                  <span style="color:#64748b;">Trạng thái:</span>
+                  <span style="background:#d1fae5; color:#065f46; font-weight:700; font-size:0.8rem; padding:2px 8px; border-radius:4px;">ĐÃ HOÀN TẤT (COMPLETED)</span>
+                </div>
+              </div>
+
+              <div style="text-align:center; margin:28px 0;">
+                <a href="https://www.enmei.asia" style="background:#063b80; color:#ffffff; padding:14px 28px; border-radius:8px; text-decoration:none; font-weight:700; display:inline-block;">
+                  📥 Tải Cẩm Nang Ebook Dinh Dưỡng PDF Ngay →
+                </a>
+              </div>
+
+              <p style="font-size:0.9rem; color:#64748b;">Nếu có bất kỳ thắc mắc nào về đơn hàng, quý khách có thể phản hồi trực tiếp email này hoặc liên hệ hotline: <strong>0946 375 566</strong>.</p>
+              
+              <div style="margin-top:24px; padding-top:16px; border-top:1px solid #f1f5f9; font-size:0.85rem; color:#64748b;">
+                <strong>Đội ngũ Chăm Sóc Khách Hàng Enmei</strong><br>
+                Email: cskh@enmei.asia | Website: https://www.enmei.asia
+              </div>
+            </div>
+          </div>
+        `
+      },
+      seq1: {
+        subject: '[Enmei] Chào mừng bạn đến với Enmei — Lời cảm ơn và bí quyết êm bụng mỗi ngày 🌿',
+        senderName: 'Enmei Dinh Dưỡng Thực Dưỡng',
+        fromAddr: 'cskh@enmei.asia',
+        avatar: 'E',
+        time: '19:43 (Hôm nay, 19 Th09, 2026)',
+        html: `
+          <div style="font-family:'Helvetica Neue', Arial, sans-serif; line-height:1.6; color:#1e293b;">
+            <div style="background:#063b80; padding:24px; text-align:center; color:#fff;">
+              <h1 style="margin:0; font-size:24px; font-weight:800;">ENMEI</h1>
+              <p style="margin:4px 0 0; font-size:14px; opacity:0.9;">Dinh Dưỡng Chuẩn Y Khoa — Bụng Êm Nhẹ Nhõm</p>
+            </div>
+            <div style="padding:32px 24px;">
+              <p style="font-size:16px; font-weight:600;">Chào bạn Trịnh Minh Hùng,</p>
+              <p>Cảm ơn bạn đã tin tưởng để lại thông tin khảo sát tại Enmei. Chúng tôi hiểu rằng việc lựa chọn một giải pháp dinh dưỡng cho bản thân hoặc cha mẹ lớn tuổi là một quyết định đòi hỏi sự cẩn trọng và thấu hiểu rất lớn.</p>
+              <p>Có bao giờ bạn hoặc người thân cảm thấy trướng bụng, đầy hơi, thậm chí phải bỏ dở ly sữa công thức vì cơ thể không thể dung nạp? Đó là một nỗi phiền toái vô cùng phổ biến khi dạ dày và hệ vi sinh đường ruột suy giảm theo tuổi tác.</p>
+              <p>Enmei ra đời với sứ mệnh: <strong>Đưa đạm thực vật nguyên bản từ hạt nảy mầm qua công nghệ thủy phân enzym phân tử nhỏ</strong> — giúp hấp thu êm dịu sau 15 phút mà hoàn toàn không bắt dạ dày phải làm việc quá sức.</p>
+              <div style="background:#f8fafc; border-left:4px solid #10b981; padding:16px; margin:20px 0; border-radius:4px;">
+                <p style="margin:0; font-weight:600; color:#063b80;">🎁 Món quà đầu tiên Enmei gửi tặng bạn:</p>
+                <p style="margin:6px 0 0; font-size:14px;">Chuyên gia dinh dưỡng Enmei đã tiếp nhận thông tin khảo sát và sẽ liên hệ hỗ trợ trong 24h tới. Trong 2 ngày tới, chúng tôi sẽ chia sẻ với bạn bí mật vì sao người lớn tuổi lại khó hấp thu sữa bột thông thường.</p>
+              </div>
+              <p style="margin-top:30px;">Chúc bạn và gia đình luôn an vui và khỏe mạnh,<br><strong>Đội ngũ Enmei Dinh Dưỡng Thực Dưỡng</strong><br><span style="font-size:13px; color:#64748b;">Website: https://www.enmei.asia</span></p>
+            </div>
+          </div>
+        `
+      },
+      seq2: {
+        subject: '[Enmei] Vì sao người lớn tuổi uống sữa hay bị đầy bụng, khó tiêu? Góc nhìn khoa học 💡',
+        senderName: 'Trịnh Minh Hùng - Enmei',
+        fromAddr: 'cskh@enmei.asia',
+        avatar: 'H',
+        time: '19:43 (Hôm nay, 19 Th09, 2026)',
+        html: `
+          <div style="font-family:'Helvetica Neue', Arial, sans-serif; line-height:1.6; color:#1e293b;">
+            <div style="background:#063b80; padding:24px; text-align:center; color:#fff;">
+              <h1 style="margin:0; font-size:24px; font-weight:800;">ENMEI NUTRITION LAB</h1>
+              <p style="margin:4px 0 0; font-size:14px; opacity:0.9;">Góc Nhìn Chuyên Gia Về Tiêu Hóa &amp; Đường Huyết</p>
+            </div>
+            <div style="padding:32px 24px;">
+              <p style="font-size:16px; font-weight:600;">Chào bạn Trịnh Minh Hùng,</p>
+              <p>Rất nhiều khách hàng tâm sự với Hùng rằng: <em>"Bố mẹ tôi gầy yếu, tôi mua đủ loại sữa ngoại đắt tiền cả triệu bạc mỗi hộp, nhưng cứ uống vào là cụ kêu sôi bụng, đi ngoài hoặc đầy trướng không ăn được cơm."</em></p>
+              <p>Vấn đề không nằm ở việc sữa đắt hay rẻ, mà nằm ở <strong>Sinh lý học của hệ tiêu hóa sau tuổi 50</strong>:</p>
+              <ol style="padding-left:20px; margin:16px 0;">
+                <li style="margin-bottom:10px;"><strong>Thiếu hụt men Lactase tự nhiên:</strong> Hơn 85% người trưởng thành châu Á bị bất dung nạp Lactose. Khi uống sữa động vật thông thường, đường lactose không được phân giải sẽ lên men trong ruột già, sinh khí gây chướng bụng.</li>
+                <li style="margin-bottom:10px;"><strong>Cấu trúc chuỗi đạm Casein quá lớn:</strong> Dạ dày người lớn tuổi giảm tiết acid và men pepsin, khiến việc bẻ gãy chuỗi đạm động vật trở thành một gánh nặng nặng nề.</li>
+                <li style="margin-bottom:10px;"><strong>Nguy cơ tăng vọt đường huyết:</strong> Nhiều loại sữa bột dùng đường sucrose hoặc maltodextrin giá rẻ để tạo vị ngậy ngọt, vô tình khiến chỉ số GI tăng vọt, nguy hiểm cho người tiền tiểu đường.</li>
+              </ol>
+              <div style="background:#f0fdf4; border-left:4px solid #16a34a; padding:16px; margin:20px 0; border-radius:4px;">
+                <p style="margin:0; font-weight:600; color:#166534;">🌿 Giải pháp từ thiên nhiên:</p>
+                <p style="margin:6px 0 0; font-size:14px;">Hệ đạm thực vật thủy phân từ hạt hạnh nhân, macca, yến mạch và óc chó nảy mầm có kích thước phân tử siêu nhỏ. Cơ thể hấp thu trực tiếp qua thành ruột non mà không cần dạ dày phải co bóp nhiều. Bụng nhẹ nhõm, giấc ngủ sâu hơn.</p>
+              </div>
+              <p>Email này hoàn toàn là chia sẻ chuyên môn, Enmei không bán bất kỳ thứ gì hôm nay. Hy vọng kiến thức này giúp bạn chăm sóc dinh dưỡng cho bản thân và cha mẹ đúng cách hơn!</p>
+              <p style="margin-top:30px;">Thân mến,<br><strong>Trịnh Minh Hùng</strong><br><span style="font-size:13px; color:#64748b;">Đồng sáng lập Enmei Vietnam</span></p>
+            </div>
+          </div>
+        `
+      },
+      seq3: {
+        subject: '[Enmei] Dành riêng cho bạn: Món quà trải nghiệm Sữa Hạt Enmei êm bụng & Link thanh toán VietQR 🎁',
+        senderName: 'Enmei Dinh Dưỡng Thực Dưỡng',
+        fromAddr: 'cskh@enmei.asia',
+        avatar: 'E',
+        time: '19:43 (Hôm nay, 19 Th09, 2026)',
+        html: `
+          <div style="font-family:'Helvetica Neue', Arial, sans-serif; line-height:1.6; color:#1e293b;">
+            <div style="background:#063b80; padding:24px; text-align:center; color:#fff;">
+              <h1 style="margin:0; font-size:24px; font-weight:800;">ENMEI</h1>
+              <p style="margin:4px 0 0; font-size:14px; opacity:0.9;">Chăm Sóc Sức Khỏe Gia Đình Bằng Sự Tận Tâm</p>
+            </div>
+            <div style="padding:32px 24px;">
+              <p style="font-size:16px; font-weight:600;">Chào bạn Trịnh Minh Hùng,</p>
+              <p>Qua 2 email trước, Hùng rất vui vì nhận được nhiều phản hồi tích cực từ bạn về những chia sẻ xoay quanh cơ chế đạm thực vật thủy phân êm bụng.</p>
+              <p>Để bạn và người thân có cơ hội tự mình kiểm chứng cảm giác <em>"Uống vào sau 15 phút bụng nhẹ tênh, không ậm ạch, không sôi bụng"</em>, Enmei dành tặng bạn một đặc quyền trải nghiệm:</p>
+              <div style="background:#fef3c7; border:1px solid #fde68a; border-radius:10px; padding:20px; margin:20px 0; text-align:center;">
+                <h3 style="color:#92400e; margin:0 0 8px;">ƯU ĐÃI ĐỒNG HÀNH 20% + TẶNG BÌNH LẮC CAO CẤP</h3>
+                <p style="color:#78350f; font-size:0.95rem; margin:0 0 16px;">Áp dụng khi đặt hàng qua Cổng thanh toán tự động VietQR Sepay</p>
+                <a href="https://www.enmei.asia/thanh-toan" style="background:#063b80; color:#fff; padding:14px 28px; border-radius:8px; text-decoration:none; font-weight:700; display:inline-block;">
+                  👉 Nhận Ưu Đãi &amp; Thanh Toán VietQR Tự Động →
+                </a>
+              </div>
+              <p style="font-size:0.9rem; color:#64748b;">Hệ thống ngân hàng Techcombank tự động quét mã QR, kích hoạt đơn hàng trong 3 giây và gửi email biên lai tức thì.</p>
+              <p style="margin-top:30px;">Chúc bạn một ngày tràn đầy năng lượng,<br><strong>Đội ngũ Enmei Dinh Dưỡng Thực Dưỡng</strong></p>
+            </div>
+          </div>
+        `
+      }
+    };
+
+    function showListView() {
+      document.getElementById('email-list-view').style.display = 'flex';
+      document.getElementById('email-detail-view').style.display = 'none';
+    }
+
+    function openEmail(key) {
+      const data = EMAILS[key];
+      if (!data) return;
+
+      document.getElementById('email-list-view').style.display = 'none';
+      document.getElementById('email-detail-view').style.display = 'flex';
+
+      document.getElementById('view-subject').textContent = data.subject;
+      document.getElementById('view-sender-name').textContent = data.senderName;
+      document.getElementById('view-from-addr').textContent = data.fromAddr;
+      document.getElementById('view-avatar').textContent = data.avatar;
+      document.getElementById('view-time').textContent = data.time;
+      document.getElementById('view-body-html').innerHTML = data.html;
+    }
+  </script>
+</body>
+</html>

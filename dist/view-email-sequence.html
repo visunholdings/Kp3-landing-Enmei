@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>email_sequence.md — Tài Liệu Thiết Kế Email Sequences Enmei</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --text-bright: #f0f6fc;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --yellow: #d29922;
+      --code-bg: #090d13;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 30px 20px;
+      line-height: 1.6;
+    }
+    .doc-container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 36px 44px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    .file-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.95rem;
+      color: #8b949e;
+    }
+    .file-icon {
+      color: var(--accent);
+      font-weight: 700;
+      background: rgba(88, 166, 255, 0.15);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    h1 {
+      color: var(--text-bright);
+      font-size: 1.8rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-top: 0;
+    }
+    h2 {
+      color: var(--text-bright);
+      font-size: 1.35rem;
+      margin-top: 32px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h2::before {
+      content: "§";
+      color: var(--accent);
+    }
+    p, li {
+      font-size: 0.98rem;
+    }
+    strong {
+      color: var(--text-bright);
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    .badge--time { background: rgba(210, 153, 34, 0.2); color: var(--yellow); border: 1px solid rgba(210, 153, 34, 0.4); }
+    .badge--sender { background: rgba(88, 166, 255, 0.2); color: var(--accent); border: 1px solid rgba(88, 166, 255, 0.4); }
+    .badge--tag { background: rgba(63, 185, 80, 0.2); color: var(--green); border: 1px solid rgba(63, 185, 80, 0.4); }
+    
+    .meta-box {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 14px 0 20px;
+    }
+    .meta-row {
+      display: flex;
+      margin-bottom: 8px;
+      font-size: 0.92rem;
+    }
+    .meta-row:last-child { margin-bottom: 0; }
+    .meta-label {
+      width: 140px;
+      color: #8b949e;
+      flex-shrink: 0;
+    }
+    .meta-val {
+      color: var(--text-bright);
+      font-weight: 500;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.85rem;
+      color: #e6edf3;
+      line-height: 1.5;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      background: rgba(110, 118, 129, 0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      color: #79c0ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="doc-container">
+    <div class="file-header">
+      <span class="file-icon">📄 Markdown</span>
+      <strong>My-brain/email_sequence.md</strong>
+      <span>• 186 dòng • 14.3 KB • Sẵn sàng triển khai Resend API</span>
+    </div>
+
+    <h1>Chuỗi Email Nuôi Dưỡng &amp; Xác Nhận Đơn Hàng Tự Động (Email Sequences &amp; Transactional Email) — Enmei</h1>
+    <p>Tài liệu này định nghĩa cấu trúc <strong>3 Email Marketing Sequences</strong> theo hành trình khách hàng và <strong>1 Transactional Email</strong> xác nhận đơn hàng, được thiết kế theo đúng Brand Voice chuẩn mực của Enmei: <em>Điềm đạm, ấm áp, thấu hiểu, khoa học và thực chiến</em>.</p>
+
+    <!-- EMAIL 1 -->
+    <h2>EMAIL 1 — CHÀO MỪNG (WELCOME EMAIL)</h2>
+    <div class="meta-box">
+      <div class="meta-row"><span class="meta-label">Thời điểm gửi:</span><span class="meta-val"><span class="badge badge--time">Tức thì (0 phút)</span> Ngay sau khi khách hàng điền form tư vấn trên enmei.asia</span></div>
+      <div class="meta-row"><span class="meta-label">Người gửi (From):</span><span class="meta-val"><span class="badge badge--sender">Enmei Dinh Dưỡng Thực Dưỡng &lt;cskh@enmei.asia&gt;</span></span></div>
+      <div class="meta-row"><span class="meta-label">Tiêu đề (Subject):</span><span class="meta-val">Chào mừng bạn đến với Enmei — Lời cảm ơn và bí quyết êm bụng mỗi ngày 🌿</span></div>
+      <div class="meta-row"><span class="meta-label">Mục tiêu:</span><span class="meta-val">Chào đón ấm áp, khẳng định triết lý đạm thực vật thủy phân phân tử nhỏ, tạo lòng tin ban đầu</span></div>
+    </div>
+    <pre><code>&lt;!-- Welcome Email Template --&gt;
+&lt;div style="background: #063b80; padding: 24px; text-align: center; color: #ffffff;"&gt;
+  &lt;h1 style="margin: 0; font-size: 24px;"&gt;ENMEI&lt;/h1&gt;
+  &lt;p&gt;Dinh Dưỡng Chuẩn Y Khoa — Bụng Êm Nhẹ Nhõm&lt;/p&gt;
+&lt;/div&gt;
+&lt;div style="padding: 32px 24px;"&gt;
+  &lt;p&gt;Chào bạn {{name}}, cảm ơn bạn đã tin tưởng để lại thông tin tại Enmei...&lt;/p&gt;
+  &lt;p&gt;Enmei ra đời với sứ mệnh: Đưa đạm thực vật nguyên bản từ hạt nảy mầm qua công nghệ thủy phân enzym phân tử nhỏ, hấp thu sau 15 phút không lo chướng bụng.&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+
+    <!-- EMAIL 2 -->
+    <h2>EMAIL 2 — NURTURE / TRAO GIÁ TRỊ (VALUE EMAIL)</h2>
+    <div class="meta-box">
+      <div class="meta-row"><span class="meta-label">Thời điểm gửi:</span><span class="meta-val"><span class="badge badge--time">Sau 2 ngày</span> (hoặc bắn ngay lập tức khi email có đuôi <code>+test</code>)</span></div>
+      <div class="meta-row"><span class="meta-label">Người gửi (From):</span><span class="meta-val"><span class="badge badge--sender">Trịnh Minh Hùng - Enmei &lt;cskh@enmei.asia&gt;</span></span></div>
+      <div class="meta-row"><span class="meta-label">Tiêu đề (Subject):</span><span class="meta-val">Vì sao người lớn tuổi uống sữa hay bị đầy bụng, khó tiêu? Góc nhìn khoa học 💡</span></div>
+      <div class="meta-row"><span class="meta-label">Mục tiêu:</span><span class="meta-val">Giáo dục thị trường 100% không bán hàng: 85% người lớn tuổi thiếu men lactase, đạm casein khó tiêu</span></div>
+    </div>
+    <pre><code>&lt;!-- Nurture Value Template --&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;strong&gt;Thiếu hụt men Lactase tự nhiên:&lt;/strong&gt; Hơn 85% người trưởng thành châu Á bất dung nạp Lactose.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Cấu trúc chuỗi đạm Casein quá lớn:&lt;/strong&gt; Dạ dày người lớn tuổi giảm tiết acid gây trướng bụng.&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Nguy cơ tăng vọt đường huyết:&lt;/strong&gt; Các loại sữa dùng đường sucrose/maltodextrin chỉ số GI cao.&lt;/li&gt;
+&lt;/ol&gt;</code></pre>
+
+    <!-- EMAIL 3 -->
+    <h2>EMAIL 3 — CHỐT DEAL &amp; CTA THANH TOÁN (OFFER EMAIL)</h2>
+    <div class="meta-box">
+      <div class="meta-row"><span class="meta-label">Thời điểm gửi:</span><span class="meta-val"><span class="badge badge--time">Sau 3 ngày</span> (hoặc kích hoạt ngay ở chế độ <code>+test</code>)</span></div>
+      <div class="meta-row"><span class="meta-label">Người gửi (From):</span><span class="meta-val"><span class="badge badge--sender">Enmei Dinh Dưỡng Thực Dưỡng &lt;cskh@enmei.asia&gt;</span></span></div>
+      <div class="meta-row"><span class="meta-label">Tiêu đề (Subject):</span><span class="meta-val">Dành riêng cho bạn: Món quà trải nghiệm Sữa Hạt Enmei êm bụng chuẩn y khoa 🎁</span></div>
+      <div class="meta-row"><span class="meta-label">Mục tiêu:</span><span class="meta-val">Ưu đãi giảm 20% + Tặng bình lắc + Điều hướng sang cổng VietQR Sepay tự động</span></div>
+    </div>
+    <pre><code>&lt;!-- Offer & CTA Template --&gt;
+&lt;div style="text-align: center; margin: 30px 0;"&gt;
+  &lt;a href="https://www.enmei.asia/thanh-toan" style="background: #063b80; color: #fff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;"&gt;
+    👉 Nhận Ưu Đãi &amp; Thanh Toán VietQR Tự Động →
+  &lt;/a&gt;
+&lt;/div&gt;</code></pre>
+
+    <!-- TRANSACTIONAL EMAIL -->
+    <h2>TRANSACTIONAL EMAIL — XÁC NHẬN ĐƠN HÀNG THÀNH CÔNG</h2>
+    <div class="meta-box">
+      <div class="meta-row"><span class="meta-label">Thời điểm gửi:</span><span class="meta-val"><span class="badge badge--tag">Kích hoạt tức thì</span> Khi khách quét QR hoặc Admin duyệt đơn trên /admin</span></div>
+      <div class="meta-row"><span class="meta-label">Người gửi (From):</span><span class="meta-val"><span class="badge badge--sender">Enmei Order &lt;cskh@enmei.asia&gt;</span></span></div>
+      <div class="meta-row"><span class="meta-label">Tiêu đề (Subject):</span><span class="meta-val">[Enmei] Xác nhận đơn hàng thành công #{{order_code}} — Cảm ơn bạn! 🎉</span></div>
+      <div class="meta-row"><span class="meta-label">Mục tiêu:</span><span class="meta-val">Xác nhận thanh toán, biên lai chi tiết, link tải Ebook PDF / hẹn lịch giao hàng</span></div>
+    </div>
+    <pre><code>&lt;!-- Transactional Order Email Template --&gt;
+&lt;h2 style="color: #10b981;"&gt;XÁC NHẬN ĐƠN HÀNG THÀNH CÔNG&lt;/h2&gt;
+&lt;p&gt;Kính gửi quý khách &lt;strong&gt;{{customer_name}}&lt;/strong&gt;,&lt;/p&gt;
+&lt;p&gt;Đơn hàng &lt;strong&gt;#{{order_code}}&lt;/strong&gt; của bạn đã được xác nhận thanh toán thành công.&lt;/p&gt;
+&lt;div style="background: #f8fafc; padding: 16px; border-radius: 6px;"&gt;
+  &lt;p&gt;&lt;strong&gt;Sản phẩm:&lt;/strong&gt; {{product_name}}&lt;/p&gt;
+  &lt;p&gt;&lt;strong&gt;Số tiền:&lt;/strong&gt; {{amount}} VNĐ&lt;/p&gt;
+  &lt;p&gt;&lt;strong&gt;Trạng thái:&lt;/strong&gt; ĐÃ THANH TOÁN (COMPLETED)&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+  </div>
+</body>
+</html>
