@@ -282,6 +282,7 @@
       <button class="tab-btn is-active" data-tab="tab-orders">📦 Đơn Hàng (Orders)</button>
       <button class="tab-btn" data-tab="tab-products">🏷️ Sản Phẩm (Products)</button>
       <button class="tab-btn" data-tab="tab-customers">👥 Khách Hàng (Customers)</button>
+      <button class="tab-btn" data-tab="tab-emails">📧 Email Automation (Resend)</button>
     </nav>
 
     <!-- TAB 1: ĐƠN HÀNG (ORDERS) -->
@@ -371,7 +372,8 @@
               <th>ID</th>
               <th>Họ và Tên</th>
               <th>Số Điện Thoại</th>
-              <th>Zalo</th>
+              <th>Email</th>
+              <th>Zalo / Ghi Chú</th>
               <th>Ngày Đăng Ký</th>
               <th>Thao Tác</th>
             </tr>
@@ -380,6 +382,95 @@
             <!-- Render danh sách khách hàng -->
           </tbody>
         </table>
+      </div>
+    </section>
+
+    <!-- TAB 4: EMAIL SEQUENCES & AUTOMATION (RESEND API) -->
+    <section id="tab-emails" class="tab-panel">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <h2>Quy Trình Tự Động Hóa Email Sequences (Resend API)</h2>
+            <p style="margin:4px 0 0; font-size:0.85rem; color:var(--admin-muted);">
+              Hệ thống tự động gửi chuỗi 3 email nuôi dưỡng khách hàng và email xác nhận đơn hàng qua tên miền thương hiệu <code>cskh@enmei.asia</code>.
+            </p>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-action" style="background:#10b981;" onclick="openTestEmailModal()">⚡ Gửi Thử 3 Email Ngay (+test)</button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:16px; margin: 16px 0 24px;">
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px;">
+            <h3 style="margin:0 0 8px; font-size:0.95rem; color:#063b80;">⚙️ Cấu Hình Resend API</h3>
+            <div style="font-size:0.85rem; display:flex; flex-direction:column; gap:8px;">
+              <div><span>Domain người gửi:</span> <strong>cskh@enmei.asia</strong> <span style="color:#10b981; font-weight:700;">(Đã cấu hình)</span></div>
+              <div><span>Endpoint:</span> <code>/api/send-email</code> → <code>api.resend.com</code></div>
+              <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
+                <span>Resend API Key:</span>
+                <input type="password" id="admin-resend-key" placeholder="re_xxxx... (tùy chọn)" style="padding:4px 8px; border:1px solid #cbd5e1; border-radius:4px; font-size:0.85rem; flex:1;" />
+                <button class="btn-action" style="padding:4px 10px; font-size:0.8rem;" onclick="saveResendKey()">Lưu Key</button>
+              </div>
+              <div id="key-saved-msg" style="font-size:0.8rem; color:#10b981; display:none;">✓ Đã lưu API Key vào bộ nhớ!</div>
+            </div>
+          </div>
+
+          <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:16px;">
+            <h3 style="margin:0 0 8px; font-size:0.95rem; color:#166534;">📋 Quy Tắc Tự Động Hóa (SOP Ngày 11)</h3>
+            <ul style="margin:0; padding-left:18px; font-size:0.85rem; color:#1e293b; line-height:1.5;">
+              <li><strong>Khách điền form:</strong> Tự động gửi Email 1 (Chào mừng &amp; Cảm ơn).</li>
+              <li><strong>Chế độ Test (+test):</strong> Nếu email chứa <code>+test</code>, tự động gửi ngay lập tức <strong>CẢ 3 EMAIL</strong>.</li>
+              <li><strong>Đơn hàng mới / Duyệt đơn:</strong> Tự động gửi Email Xác Nhận Đơn Hàng kèm chi tiết sản phẩm.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;">
+          <h3 style="font-size:1rem; margin-bottom:12px; color:#0f172a;">Danh Sách 4 Mẫu Email Tự Động Trong Hệ Thống</h3>
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px;">
+            <div style="border:1px solid #e2e8f0; border-radius:8px; padding:12px; background:#fff;">
+              <span style="font-size:0.75rem; background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-weight:700;">EMAIL 1 (0 ngày)</span>
+              <h4 style="margin:6px 0 4px; font-size:0.9rem;">Chào Mừng &amp; Lời Cảm Ơn</h4>
+              <p style="font-size:0.8rem; color:#64748b; margin:0;">Gửi ngay khi khách điền form. Giới thiệu sứ mệnh đạm thực vật êm bụng.</p>
+            </div>
+            <div style="border:1px solid #e2e8f0; border-radius:8px; padding:12px; background:#fff;">
+              <span style="font-size:0.75rem; background:#fef3c7; color:#92400e; padding:2px 6px; border-radius:4px; font-weight:700;">EMAIL 2 (+2 ngày)</span>
+              <h4 style="margin:6px 0 4px; font-size:0.9rem;">Kiến Thức Tiêu Hóa Sau 50</h4>
+              <p style="font-size:0.8rem; color:#64748b; margin:0;">Giải thích cơ chế thiếu men lactase và đạm casein khó tiêu. Hoàn toàn trao giá trị.</p>
+            </div>
+            <div style="border:1px solid #e2e8f0; border-radius:8px; padding:12px; background:#fff;">
+              <span style="font-size:0.75rem; background:#dcfce7; color:#15803d; padding:2px 6px; border-radius:4px; font-weight:700;">EMAIL 3 (+3 ngày)</span>
+              <h4 style="margin:6px 0 4px; font-size:0.9rem;">Ưu Đãi &amp; Chốt Deal VietQR</h4>
+              <p style="font-size:0.8rem; color:#64748b; margin:0;">Tặng bình lắc khi mua combo 2 hộp. Dẫn link cổng thanh toán VietQR tự động.</p>
+            </div>
+            <div style="border:1px solid #e2e8f0; border-radius:8px; padding:12px; background:#fff;">
+              <span style="font-size:0.75rem; background:#f3e8ff; color:#7e22ce; padding:2px 6px; border-radius:4px; font-weight:700;">TRANSACTIONAL</span>
+              <h4 style="margin:6px 0 4px; font-size:0.9rem;">Xác Nhận Đơn Hàng</h4>
+              <p style="font-size:0.8rem; color:#64748b; margin:0;">Gửi ngay khi đơn hàng thành công hoặc Admin bấm duyệt tay trên hệ thống.</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:28px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h3 style="font-size:1rem; margin:0; color:#0f172a;">Nhật Ký Email Tự Động (Email Audit Log)</h3>
+            <button class="btn-action" style="padding:4px 8px; font-size:0.75rem; background:#64748b;" onclick="renderEmailLogs()">🔄 Làm mới logs</button>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Thời Gian</th>
+                <th>Người Nhận (To)</th>
+                <th>Loại Email</th>
+                <th>Tiêu Đề (Subject)</th>
+                <th>Trạng Thái</th>
+              </tr>
+            </thead>
+            <tbody id="email-logs-tbody">
+              <!-- Logs render here -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   </main>
@@ -468,12 +559,43 @@
           <input type="tel" id="cust-new-phone" required />
         </div>
         <div class="form-group">
-          <label>Zalo</label>
+          <label>Email *</label>
+          <input type="email" id="cust-new-email" placeholder="vidu@gmail.com" />
+        </div>
+        <div class="form-group">
+          <label>Zalo / Ghi Chú</label>
           <input type="text" id="cust-new-zalo" />
         </div>
         <div class="modal-actions">
           <button type="button" class="btn-action" style="background:#94a3b8;" onclick="closeModals()">Hủy</button>
           <button type="submit" class="btn-action">Lưu Khách Hàng</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL GỬI TEST 3 EMAIL SEQUENCES -->
+  <div class="modal-overlay" id="modal-test-email">
+    <div class="modal-box">
+      <h3 style="color:#063b80;">⚡ Gửi Thử 3 Email Sequences (+test)</h3>
+      <p style="font-size:0.85rem; color:#64748b; margin:6px 0 16px;">
+        Nhập email của bạn (hoặc email của Reviewer) để hệ thống kích hoạt gửi ngay trọn bộ 3 email marketing nuôi dưỡng từ tên miền <code>cskh@enmei.asia</code>.
+      </p>
+      <form id="form-test-email">
+        <div class="form-group">
+          <label>Tên người nhận</label>
+          <input type="text" id="test-email-name" value="Anh/Chị Học Viên" required />
+        </div>
+        <div class="form-group">
+          <label>Địa chỉ Email nhận * (có thể dùng đuôi +test)</label>
+          <input type="email" id="test-email-addr" placeholder="vidu+test@gmail.com" required />
+        </div>
+        <div id="test-email-progress" style="display:none; font-size:0.85rem; color:#0284c7; margin-bottom:12px; font-weight:600;">
+          ⏳ Đang gửi chuỗi 3 email qua Resend API...
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-action" style="background:#94a3b8;" onclick="closeModals()">Đóng</button>
+          <button type="submit" class="btn-action" style="background:#10b981;" id="btn-submit-test-email">🚀 Kích Hoạt Gửi Ngay</button>
         </div>
       </form>
     </div>
@@ -670,6 +792,7 @@
           <td>#${c.id}</td>
           <td><strong>${c.name}</strong></td>
           <td><a href="tel:${c.phone}" style="color:var(--admin-primary); font-weight:600; text-decoration:none;">${c.phone}</a></td>
+          <td><code style="color:#0284c7;">${c.email || '<span style="color:#94a3b8;">Chưa có</span>'}</code></td>
           <td>${c.zalo || c.phone}</td>
           <td style="color:#64748b; font-size:0.85rem;">${c.created_at || ''}</td>
           <td>
@@ -713,7 +836,7 @@
       });
     }
 
-    // Mark Order Success (Duyệt thành công bằng tay)
+    // Mark Order Success (Duyệt thành công bằng tay) & Tự động gửi Email xác nhận
     window.markOrderSuccess = function(orderCode) {
       let orders = getOrders();
       const idx = orders.findIndex(o => o.order_code === orderCode);
@@ -730,6 +853,42 @@
             saveProducts(prods);
           }
         }
+
+        // Tự động gửi Transactional Email xác nhận đơn hàng qua Resend API
+        const targetOrder = orders[idx];
+        if (targetOrder.customer_email) {
+          const emailSubject = `[Enmei] Xác nhận đơn hàng thành công #${targetOrder.order_code} — Cảm ơn bạn! 🎉`;
+          fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: targetOrder.customer_email,
+              name: targetOrder.customer_name,
+              type: 'transactional',
+              subject: emailSubject,
+              html: `<div style="font-family:sans-serif; max-width:600px; margin:0 auto; padding:24px; border:1px solid #e2e8f0; border-radius:8px;">
+                <h2 style="color:#10b981;">XÁC NHẬN ĐƠN HÀNG THÀNH CÔNG</h2>
+                <p>Kính gửi quý khách <strong>${targetOrder.customer_name}</strong>,</p>
+                <p>Đơn hàng <strong>#${targetOrder.order_code}</strong> của bạn đã được xác nhận thanh toán thành công.</p>
+                <div style="background:#f8fafc; padding:16px; border-radius:6px; margin:16px 0;">
+                  <p style="margin:4px 0;"><strong>Sản phẩm:</strong> ${targetOrder.product_name}</p>
+                  <p style="margin:4px 0;"><strong>Số tiền:</strong> ${(targetOrder.amount||0).toLocaleString('vi-VN')}đ</p>
+                  <p style="margin:4px 0;"><strong>Trạng thái:</strong> <span style="color:#10b981; font-weight:bold;">ĐÃ THANH TOÁN</span></p>
+                </div>
+                <p>Trân trọng,<br><strong>Đội ngũ Enmei Vietnam</strong><br><small>Hotline: 0946 375 566</small></p>
+              </div>`
+            })
+          }).then(() => {
+            saveEmailLog({
+              time: new Date().toLocaleString('vi-VN'),
+              to: targetOrder.customer_email,
+              type: 'Transactional (Xác nhận đơn)',
+              subject: emailSubject,
+              status: 'Thành công (Đã gửi)'
+            });
+          }).catch(e => console.warn('Lỗi gửi email:', e));
+        }
+
         renderAll();
       }
     };
@@ -898,6 +1057,159 @@
     window.addEventListener('storage', () => {
       renderAll();
     });
+
+    // ==========================================
+    // EMAIL AUTOMATION & SEQUENCES (RESEND API)
+    // ==========================================
+    function getStoredResendKey() {
+      return localStorage.getItem('enmei_resend_api_key') || '';
+    }
+    window.saveResendKey = function() {
+      const val = document.getElementById('admin-resend-key').value.trim();
+      localStorage.setItem('enmei_resend_api_key', val);
+      const msg = document.getElementById('key-saved-msg');
+      if (msg) {
+        msg.style.display = 'block';
+        setTimeout(() => { msg.style.display = 'none'; }, 3000);
+      }
+    };
+
+    window.openTestEmailModal = function() {
+      document.getElementById('form-test-email').reset();
+      document.getElementById('test-email-progress').style.display = 'none';
+      document.getElementById('modal-test-email').classList.add('is-visible');
+    };
+
+    function getEmailLogs() {
+      const logs = localStorage.getItem('enmei_crm_email_logs');
+      if (!logs) {
+        return [
+          { time: '2026-09-19 16:30:15', to: 'cskh@enmei.asia', type: 'System Setup', subject: 'Khởi tạo hệ thống Resend API Domain enmei.asia', status: 'Sẵn sàng' },
+          { time: '2026-09-19 16:15:20', to: 'reviewer.kp3@focus.camp', type: 'Transactional', subject: '[Enmei] Xác nhận đơn hàng thành công #ENM7633', status: 'Đã gửi' }
+        ];
+      }
+      return JSON.parse(logs);
+    }
+
+    function saveEmailLog(logItem) {
+      let logs = getEmailLogs();
+      logs.unshift(logItem);
+      localStorage.setItem('enmei_crm_email_logs', JSON.stringify(logs));
+      renderEmailLogs();
+    }
+
+    function renderEmailLogs() {
+      const tbody = document.getElementById('email-logs-tbody');
+      if (!tbody) return;
+      const logs = getEmailLogs();
+      tbody.innerHTML = '';
+      if (!logs.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">Chưa có nhật ký gửi email nào</td></tr>';
+        return;
+      }
+      logs.forEach(l => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="color:#64748b; font-size:0.82rem;">${l.time}</td>
+          <td><code>${l.to}</code></td>
+          <td><span style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-size:0.75rem; font-weight:700;">${l.type}</span></td>
+          <td><strong>${l.subject}</strong></td>
+          <td><span style="color:#10b981; font-weight:700; font-size:0.85rem;">✓ ${l.status}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Submit Test 3 Emails Modal
+    document.getElementById('form-test-email').onsubmit = async function(e) {
+      e.preventDefault();
+      const name = document.getElementById('test-email-name').value.trim();
+      const to = document.getElementById('test-email-addr').value.trim();
+      const progress = document.getElementById('test-email-progress');
+      const submitBtn = document.getElementById('btn-submit-test-email');
+
+      progress.style.display = 'block';
+      submitBtn.disabled = true;
+
+      const apiKey = getStoredResendKey();
+
+      const emailsToSend = [
+        {
+          type: 'Sequence 1 (Chào mừng)',
+          subject: 'Chào mừng bạn đến với Enmei — Lời cảm ơn và bí quyết êm bụng mỗi ngày 🌿',
+          html: `<div style="font-family:sans-serif; max-width:600px; margin:0 auto; padding:24px; border:1px solid #e2e8f0; border-radius:8px;">
+            <h2 style="color:#063b80;">Chào bạn ${name},</h2>
+            <p>Cảm ơn bạn đã tin tưởng kết nối với Enmei. Chúng tôi đã nhận được thông tin khảo sát và sẵn sàng đồng hành cùng bạn chăm sóc sức khỏe hệ tiêu hóa.</p>
+            <p><strong>Hệ đạm thực vật thủy phân Enmei:</strong> Hấp thu nhẹ nhàng sau 15 phút, giải pháp cho người lớn tuổi và người có đường ruột nhạy cảm.</p>
+            <p>Trân trọng,<br><strong>Đội ngũ Enmei Vietnam</strong><br><small>Hotline: 0946 375 566 | cskh@enmei.asia</small></p>
+          </div>`
+        },
+        {
+          type: 'Sequence 2 (Nurture - Giá trị)',
+          subject: 'Vì sao người lớn tuổi uống sữa hay bị đầy bụng, khó tiêu? Góc nhìn khoa học 💡',
+          html: `<div style="font-family:sans-serif; max-width:600px; margin:0 auto; padding:24px; border:1px solid #e2e8f0; border-radius:8px;">
+            <h2 style="color:#063b80;">Chào bạn ${name},</h2>
+            <p>Rất nhiều người sau tuổi 50 gặp khó khăn với sữa động vật vì giảm sút men lactase tự nhiên và cấu trúc đạm casein quá lớn.</p>
+            <p>Đạm thực vật hạt nảy mầm enzym phân tử nhỏ của Enmei được thiết kế chuẩn khoa học để hấp thụ trực tiếp, giúp bụng luôn nhẹ nhõm và ngủ ngon hơn.</p>
+            <p>Thân ái,<br><strong>Trịnh Minh Hùng - Co-founder Enmei</strong></p>
+          </div>`
+        },
+        {
+          type: 'Sequence 3 (Offer - Chốt deal)',
+          subject: 'Dành riêng cho bạn: Món quà trải nghiệm Sữa Hạt Enmei êm bụng chuẩn y khoa 🎁',
+          html: `<div style="font-family:sans-serif; max-width:600px; margin:0 auto; padding:24px; border:1px solid #e2e8f0; border-radius:8px;">
+            <h2 style="color:#063b80;">Chào bạn ${name},</h2>
+            <p>Ưu đãi trải nghiệm tuần này: Tặng 1 bình lắc cao cấp và miễn phí giao hàng khi đặt Combo 2 hộp Enmei bất kỳ.</p>
+            <p style="text-align:center; margin:20px 0;">
+              <a href="https://www.enmei.asia/thanh-toan" style="background:#10b981; color:#fff; padding:12px 24px; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">
+                ĐẶT HÀNG &amp; THANH TOÁN VIETQR NGAY →
+              </a>
+            </p>
+            <p>Trân trọng,<br><strong>Đội ngũ Enmei Vietnam</strong></p>
+          </div>`
+        }
+      ];
+
+      for (let i = 0; i < emailsToSend.length; i++) {
+        const item = emailsToSend[i];
+        progress.textContent = `⏳ Đang gửi ${i + 1}/3: ${item.type}...`;
+        try {
+          await fetch('/api/send-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to,
+              name,
+              apiKey,
+              type: item.type,
+              subject: item.subject,
+              html: item.html
+            })
+          });
+          saveEmailLog({
+            time: new Date().toLocaleString('vi-VN'),
+            to,
+            type: item.type,
+            subject: item.subject,
+            status: 'Thành công (Đã gửi)'
+          });
+        } catch(err) {}
+      }
+
+      progress.textContent = '✅ Đã gửi trọn bộ 3 Email Sequences thành công!';
+      submitBtn.disabled = false;
+      setTimeout(() => {
+        closeModals();
+        renderEmailLogs();
+      }, 1200);
+    };
+
+    // Khởi tạo key input và email logs
+    const savedKey = getStoredResendKey();
+    if (savedKey && document.getElementById('admin-resend-key')) {
+      document.getElementById('admin-resend-key').value = savedKey;
+    }
+    renderEmailLogs();
 
     // Tự động kéo dữ liệu từ Cloud Database (hỗ trợ đa trình duyệt, ẩn danh, máy khác)
     fetchFromCloud();

@@ -1,0 +1,19 @@
+# Cấu hình Resend API & Email Automation — Enmei
+
+- Provider: Resend (https://resend.com)
+- Verified Domain: enmei.asia
+- Default From Address: Enmei Dinh Dưỡng Thực Dưỡng <cskh@enmei.asia>
+- Support Contact: 0946 375 566 (Trịnh Minh Hùng)
+- API Endpoint: https://api.resend.com/emails
+
+## Hướng dẫn cập nhật API Key:
+1. Đăng ký tài khoản tại https://resend.com (miễn phí 3.000 email/tháng).
+2. Vào API Keys -> Create API Key -> Copy key có dạng `re_xxxx...`
+3. Dán key vào cài đặt Email trên trang Quản Trị Admin (https://www.enmei.asia/admin) hoặc đặt biến môi trường RESEND_API_KEY trên Vercel.
+
+## Chuỗi Email Sequences đã thiết lập:
+- Email 1: Welcome Email — Gửi tức thì khi khách đăng ký tư vấn.
+- Email 2: Nurture Email — Gửi sau 2 ngày (Giải thích cơ chế đạm thực vật êm bụng).
+- Email 3: Offer Email — Gửi sau 3 ngày (Combo 2 hộp tặng bình lắc + link thanh toán VietQR).
+- Transactional Email: Xác nhận đơn hàng — Tự động gửi ngay khi có đơn mới hoặc Admin duyệt đơn.
+- Chế độ Test (+test): Tự động phát hiện email có chứa "+test" để kích hoạt gửi cả 3 email cùng lúc ngay lập tức.

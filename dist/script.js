@@ -66,6 +66,14 @@ form?.addEventListener('submit', async (event) => {
     return;
   }
 
+  const email = form.elements.email ? form.elements.email.value.trim() : '';
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    formMessage.textContent = 'Địa chỉ email chưa đúng định dạng. Vui lòng kiểm tra lại.';
+    formMessage.className = 'form-message is-visible is-error';
+    if (form.elements.email) form.elements.email.focus();
+    return;
+  }
+
   const params = new URLSearchParams(window.location.search);
   const buyer = form.elements.buyer.value;
   const need = form.elements.need.value;
@@ -74,10 +82,10 @@ form?.addEventListener('submit', async (event) => {
     submissionId: createSubmissionId(),
     name: form.elements.name.value.trim(),
     phone,
+    email,
     buyer,
     need,
     usedBefore,
-    // Giữ dữ liệu đọc được trong cấu trúc lead cũ, đồng thời gửi các trường mới ở trên.
     age: `Mua cho: ${buyer}`,
     surveyNeed: `${need}; Đã từng dùng: ${usedBefore}`,
     website: form.elements.website.value,
@@ -96,12 +104,105 @@ form?.addEventListener('submit', async (event) => {
   formMessage.className = 'form-message';
 
   try {
-    await fetch(leadEndpoint, {
+    // 1. Gửi sang Google Sheets (hạ tầng cũ)
+    fetch(leadEndpoint, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload),
-    });
+    }).catch(() => {});
+
+    // 2. Đồng bộ khách hàng vào Cloud CRM (dùng chung cho Admin đa trình duyệt)
+    try {
+      const cloudRes = await fetch('https://extendsclass.com/api/json-storage/bin/bfebddd');
+      if (cloudRes.ok) {
+        const cloudData = await cloudRes.json();
+        if (!cloudData.customers) cloudData.customers = [];
+        const exist = cloudData.customers.find(c => c.phone === phone || c.email === email);
+        if (!exist) {
+          cloudData.customers.unshift({
+            id: Date.now(),
+            name: payload.name,
+            phone,
+            email,
+            tier: 'lead',
+            total_spent: 0,
+            survey: `Mua cho: ${buyer}; Nhu cầu: ${need}`,
+            created_at: new Date().toLocaleString('vi-VN')
+          });
+          await fetch('https://extendsclass.com/api/json-storage/bin/bfebddd', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cloudData)
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('Lỗi lưu Cloud CRM:', e);
+    }
+
+    // 3. Kích hoạt chuỗi Email Sequences (Resend API)
+    try {
+      const isTest = email.includes('+test') || email.includes('test');
+      
+      // Gửi Email 1 (Welcome)
+      await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: email,
+          name: payload.name,
+          type: 'sequence_1',
+          subject: 'Chào mừng bạn đến với Enmei — Lời cảm ơn và bí quyết êm bụng mỗi ngày 🌿',
+          html: `<div style="font-family:sans-serif; max-width:600px; margin:0 auto; padding:20px; border:1px solid #e2e8f0; border-radius:8px;">
+            <h2 style="color:#063b80;">Chào bạn ${payload.name},</h2>
+            <p>Cảm ơn bạn đã tin tưởng để lại thông tin tại Enmei. Chúng tôi hiểu rằng việc lựa chọn giải pháp dinh dưỡng êm bụng cho bản thân và cha mẹ là quyết định vô cùng quan trọng.</p>
+            <p>Đội ngũ chuyên gia dinh dưỡng của Enmei đã tiếp nhận thông tin khảo sát và sẽ liên hệ hỗ trợ bạn trong vòng 24 giờ tới.</p>
+            <p style="background:#f0fdf4; padding:12px; border-left:4px solid #10b981;">🌿 <strong>Hệ đạm thực vật thủy phân Enmei:</strong> Hấp thu nhẹ nhàng sau 15 phút, không lo đầy hơi trướng bụng.</p>
+            <p>Trân trọng,<br><strong>Đội ngũ Enmei Dinh Dưỡng Thực Dưỡng</strong><br><small>Hotline: 0946 375 566</small></p>
+          </div>`
+        })
+      });
+
+      // Nếu chứa +test: Gửi luôn Email 2 và Email 3 tức thì!
+      if (isTest) {
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: email,
+            name: payload.name,
+            type: 'sequence_2',
+            subject: '[Test Sequence 2] Vì sao người lớn tuổi uống sữa hay bị đầy bụng, khó tiêu? Góc nhìn khoa học 💡',
+            html: `<div style="font-family:sans-serif; max-width:600px; margin:0 auto; padding:20px; border:1px solid #e2e8f0; border-radius:8px;">
+              <h2 style="color:#063b80;">[Test Nurture 2] Chào bạn ${payload.name},</h2>
+              <p>Rất nhiều người lớn tuổi sau 50 tuổi bị thiếu men lactase tự nhiên và khó dung nạp đạm casein động vật, dẫn đến sôi bụng và khó tiêu.</p>
+              <p>Hệ đạm thực vật thủy phân enzym phân tử nhỏ từ hạt nảy mầm Enmei chính là giải pháp tự nhiên giúp ruột non hấp thu êm dịu nhất.</p>
+              <p>Thân mến,<br><strong>Trịnh Minh Hùng - Co-founder Enmei</strong></p>
+            </div>`
+          })
+        });
+
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: email,
+            name: payload.name,
+            type: 'sequence_3',
+            subject: '[Test Sequence 3] Dành riêng cho bạn: Món quà trải nghiệm Sữa Hạt Enmei êm bụng chuẩn y khoa 🎁',
+            html: `<div style="font-family:sans-serif; max-width:600px; margin:0 auto; padding:20px; border:1px solid #e2e8f0; border-radius:8px;">
+              <h2 style="color:#063b80;">[Test Offer 3] Chào bạn ${payload.name},</h2>
+              <p>Ưu đãi tuần này: Tặng 1 bình lắc và miễn phí vận chuyển khi đặt Combo 2 hộp Enmei bất kỳ.</p>
+              <p><a href="https://www.enmei.asia/thanh-toan" style="background:#10b981; color:#fff; padding:10px 20px; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">ĐẶT HÀNG &amp; THANH TOÁN VIETQR NGAY →</a></p>
+              <p>Trân trọng,<br><strong>Đội ngũ Enmei Vietnam</strong></p>
+            </div>`
+          })
+        });
+      }
+    } catch (e) {
+      console.warn('Lỗi gửi email sequence:', e);
+    }
 
     form.reset();
     formFields.hidden = true;
