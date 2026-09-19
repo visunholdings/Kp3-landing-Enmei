@@ -582,6 +582,13 @@
       document.getElementById('view-time').textContent = data.time;
       document.getElementById('view-body-html').innerHTML = data.html;
     }
+
+    // Auto open if specified in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewParam = urlParams.get('view');
+    if (viewParam && EMAILS[viewParam]) {
+      openEmail(viewParam);
+    }
   </script>
 </body>
 </html>
