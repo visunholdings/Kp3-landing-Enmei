@@ -625,7 +625,8 @@
       { id: 3, order_code: 'ENM-9823', customer_name: 'Trịnh Minh Hùng', customer_phone: '0946375566', customer_email: 'hungtrinhth@gmail.com', product_id: 4, product_name: 'Cẩm Nang Dinh Dưỡng Đường Huyết 14 Ngày (Ebook PDF)', product_type: 'digital', amount: 2000, status: 'pending', created_at: '2026-09-19 15:10:00' }
     ];
 
-    const CLOUD_DB_URL = 'https://extendsclass.com/api/json-storage/bin/bfebddd';
+    const API_ORDERS_URL = '/api/orders';
+    const CLOUD_FALLBACK_URL = 'https://extendsclass.com/api/json-storage/bin/bfebddd';
 
     // State
     function getProducts() {
@@ -670,9 +671,24 @@
     // CLOUD DATABASE SYNC (Hoạt động xuyên suốt mọi trình duyệt, ẩn danh, máy khác)
     async function fetchFromCloud(manual = false) {
       try {
-        const res = await fetch(CLOUD_DB_URL + '?t=' + Date.now());
-        if (res.ok) {
-          const cloud = await res.json();
+        let cloud = null;
+        // 1. Thử gọi API Serverless /api/orders (Same-origin, không bao giờ lỗi CORS)
+        try {
+          const res = await fetch(API_ORDERS_URL + '?t=' + Date.now());
+          if (res.ok) {
+            cloud = await res.json();
+          }
+        } catch(e) {}
+
+        // 2. Fallback sang Cloud bin trực tiếp nếu chạy local file://
+        if (!cloud || !cloud.orders) {
+          try {
+            const fbRes = await fetch(CLOUD_FALLBACK_URL + '?t=' + Date.now());
+            if (fbRes.ok) cloud = await fbRes.json();
+          } catch(e) {}
+        }
+
+        if (cloud) {
           let hasChange = false;
           if (cloud.orders && Array.isArray(cloud.orders)) {
             localStorage.setItem('enmei_crm_orders', JSON.stringify(cloud.orders));
@@ -712,11 +728,11 @@
           orders: getOrders(),
           email_logs: getEmailLogs()
         };
-        await fetch(CLOUD_DB_URL, {
+        await fetch(API_ORDERS_URL, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
-        });
+        }).catch(() => {});
       } catch (err) {
         console.warn('Lỗi push Cloud DB:', err);
       }
@@ -848,6 +864,13 @@
       if (idx !== -1) {
         orders[idx].status = 'success';
         saveOrders(orders);
+
+        // Đồng bộ Cloud Database Serverless
+        fetch(API_ORDERS_URL, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_code: orderCode, status: 'success' })
+        }).catch(() => {});
 
         // Quy tắc quan trọng: Chỉ trừ tồn kho nếu sản phẩm vật lý (physical)
         const prods = getProducts();

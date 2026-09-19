@@ -260,8 +260,9 @@
             <button class="button button--primary button--full" id="btn-check-payment" type="button">
               🔄 Tôi đã chuyển khoản xong (Kiểm tra ngay)
             </button>
+            <div id="payment-notice" style="display:none; margin-top:4px;"></div>
             <p style="font-size:0.8rem; color:#64748b; text-align:center; margin:0;">
-              Hệ thống Sepay tự động quét giao dịch ngân hàng theo nội dung đơn hàng.
+              Hệ thống tự động quét biến động số dư Techcombank theo đúng mã đơn hàng.
             </p>
           </div>
         </div>
@@ -290,15 +291,13 @@
 
         <p style="font-size:0.9rem; color:#64748b;">Đội ngũ Enmei sẽ liên hệ xác nhận và giao hàng/gửi tài liệu đến bạn trong thời gian sớm nhất.</p>
         <div style="margin-top:24px; display:flex; gap:12px; justify-content:center;">
-          <a href="/" class="button button--outline">Về Trang Chủ</a>
-          <a href="/admin" class="button button--primary">Vào Trang Admin Quản Lý →</a>
+          <a href="/" class="button button--primary" style="padding: 12px 28px;">← Quay Về Trang Chủ Enmei</a>
         </div>
       </div>
     </div>
 
     <div class="nav-links-bar">
-      <a href="/">← Về Trang Chủ Enmei</a> | 
-      <a href="/admin" target="_blank">Truy cập Trang Admin Panel (CRM) ↗</a>
+      <a href="/">← Về Trang Chủ Enmei</a>
     </div>
   </div>
 
@@ -424,59 +423,46 @@
       displaySepayQR(currentOrder);
     });
 
-    const CLOUD_DB_URL = 'https://extendsclass.com/api/json-storage/bin/bfebddd';
+    const API_ORDERS_URL = '/api/orders';
 
     async function saveOrderToStorage(order) {
       // 1. Lưu Local fallback
-      let orders = JSON.parse(localStorage.getItem('enmei_crm_orders') || '[]');
-      orders.unshift(order);
-      localStorage.setItem('enmei_crm_orders', JSON.stringify(orders));
-
-      let customers = JSON.parse(localStorage.getItem('enmei_crm_customers') || '[]');
-      const exists = customers.find(c => c.phone === order.customer_phone);
-      if (!exists) {
-        customers.unshift({
-          id: Date.now(),
-          name: order.customer_name,
-          phone: order.customer_phone,
-          email: order.customer_email,
-          tier: 'lead',
-          total_spent: order.amount,
-          created_at: new Date().toLocaleString('vi-VN')
-        });
-        localStorage.setItem('enmei_crm_customers', JSON.stringify(customers));
-      }
-
-      // 2. Đồng bộ lên Cloud DB ngay lập tức (Dùng chung cho mọi trình duyệt, kể cả ẩn danh)
       try {
-        const res = await fetch(CLOUD_DB_URL);
-        if (res.ok) {
-          const cloudData = await res.json();
-          if (!cloudData.orders) cloudData.orders = [];
-          if (!cloudData.customers) cloudData.customers = [];
+        let orders = JSON.parse(localStorage.getItem('enmei_crm_orders') || '[]');
+        orders.unshift(order);
+        localStorage.setItem('enmei_crm_orders', JSON.stringify(orders));
 
-          cloudData.orders.unshift(order);
-
-          if (!cloudData.customers.some(c => c.phone === order.customer_phone)) {
-            cloudData.customers.unshift({
-              id: Date.now(),
-              name: order.customer_name,
-              phone: order.customer_phone,
-              email: order.customer_email,
-              tier: 'lead',
-              total_spent: order.amount,
-              created_at: new Date().toLocaleString('vi-VN')
-            });
-          }
-
-          await fetch(CLOUD_DB_URL, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(cloudData)
+        let customers = JSON.parse(localStorage.getItem('enmei_crm_customers') || '[]');
+        const exists = customers.find(c => c.phone === order.customer_phone);
+        if (!exists) {
+          customers.unshift({
+            id: Date.now(),
+            name: order.customer_name,
+            phone: order.customer_phone,
+            email: order.customer_email,
+            tier: 'lead',
+            total_spent: order.amount,
+            created_at: new Date().toLocaleString('vi-VN')
           });
+          localStorage.setItem('enmei_crm_customers', JSON.stringify(customers));
+        }
+      } catch(e) {}
+
+      // 2. Đồng bộ lên Vercel Serverless Function & Cloud Database (Hoạt động đa trình duyệt, incognito, mobile)
+      try {
+        const res = await fetch(API_ORDERS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(order)
+        });
+        if (res.ok) {
+          const result = await res.json();
+          console.log('✓ Đã đồng bộ đơn hàng lên Cloud Database:', result);
+        } else {
+          console.warn('API /api/orders returned error:', res.status);
         }
       } catch (err) {
-        console.warn('Lỗi đồng bộ Cloud DB:', err);
+        console.warn('Lỗi gọi API Cloud Orders:', err);
       }
     }
 
@@ -497,11 +483,25 @@
       startPollingCheck(order.order_code);
     }
 
-    // Check payment status
-    function checkPaymentStatus(orderCode) {
+    // Check payment status from Cloud Database & Local
+    async function checkPaymentStatus(orderCode) {
+      try {
+        // Kiểm tra Cloud API
+        const res = await fetch(API_ORDERS_URL + '?order_code=' + encodeURIComponent(orderCode) + '&t=' + Date.now());
+        if (res.ok) {
+          const json = await res.json();
+          if (json.order && (json.order.status === 'success' || json.order.status === 'completed')) {
+            showSuccessView(json.order);
+            if (pollInterval) clearInterval(pollInterval);
+            return true;
+          }
+        }
+      } catch (e) {}
+
+      // Fallback local check
       const orders = JSON.parse(localStorage.getItem('enmei_crm_orders') || '[]');
       const target = orders.find(o => o.order_code === orderCode);
-      if (target && target.status === 'success') {
+      if (target && (target.status === 'success' || target.status === 'completed')) {
         showSuccessView(target);
         if (pollInterval) clearInterval(pollInterval);
         return true;
@@ -513,57 +513,37 @@
       if (pollInterval) clearInterval(pollInterval);
       pollInterval = setInterval(() => {
         checkPaymentStatus(orderCode);
-      }, 2000);
+      }, 3000);
     }
 
-    // Button manually trigger check or mark success
-    document.getElementById('btn-check-payment').addEventListener('click', function() {
+    // Button manually trigger check
+    document.getElementById('btn-check-payment').addEventListener('click', async function() {
       if (!currentOrder) return;
       
-      // If already success via admin
-      if (checkPaymentStatus(currentOrder.order_code)) return;
-
-      // Hỗ trợ mô phỏng ngay khi người dùng bấm xác nhận sau khi quét mã
       const btn = this;
+      const noticeBox = document.getElementById('payment-notice');
       btn.disabled = true;
-      btn.textContent = 'Đang đồng bộ giao dịch ngân hàng...';
+      btn.textContent = '⏳ Đang kiểm tra đối soát với ngân hàng...';
 
-      setTimeout(async () => {
-        let orders = JSON.parse(localStorage.getItem('enmei_crm_orders') || '[]');
-        const idx = orders.findIndex(o => o.order_code === currentOrder.order_code);
-        if (idx !== -1) {
-          orders[idx].status = 'success';
-          localStorage.setItem('enmei_crm_orders', JSON.stringify(orders));
+      // Kiểm tra thực tế trạng thái từ server
+      const isPaid = await checkPaymentStatus(currentOrder.order_code);
+      if (isPaid) return;
 
-          // Trừ tồn kho nếu sản phẩm physical
-          if (orders[idx].product_type === 'physical') {
-            deductStock(orders[idx].product_id);
-          }
-
-          showSuccessView(orders[idx]);
-
-          // Cập nhật trạng thái lên Cloud DB
-          try {
-            const res = await fetch(CLOUD_DB_URL);
-            if (res.ok) {
-              const cloudData = await res.json();
-              const cIdx = (cloudData.orders || []).findIndex(o => o.order_code === currentOrder.order_code);
-              if (cIdx !== -1) {
-                cloudData.orders[cIdx].status = 'success';
-                if (orders[idx].product_type === 'physical') {
-                  const p = (cloudData.products || []).find(prod => prod.id === orders[idx].product_id);
-                  if (p && typeof p.stock === 'number' && p.stock > 0) p.stock -= 1;
-                }
-                await fetch(CLOUD_DB_URL, {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(cloudData)
-                });
-              }
-            }
-          } catch(e) {}
+      // Nếu chưa thanh toán (đang chờ duyệt): Hiển thị thông báo ghi nhận
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.textContent = '🔄 Kiểm tra lại trạng thái chuyển khoản';
+        if (noticeBox) {
+          noticeBox.style.display = 'block';
+          noticeBox.innerHTML = `
+            <div style="background:#f0f9ff; border:1px solid #bae6fd; color:#0369a1; padding:12px 14px; border-radius:10px; font-size:0.85rem; line-height:1.5;">
+              <strong style="color:#0284c7;">✓ Đã ghi nhận thông báo chuyển khoản!</strong><br>
+              Đơn hàng <strong>#${currentOrder.order_code}</strong> đang chờ Kế toán đối soát với biến động số dư Techcombank.<br>
+              <span style="color:#64748b; font-size:0.8rem;">Sau khi Admin xác nhận tiền vào, trang sẽ tự động kích hoạt thành công. Bạn cũng có thể bấm kiểm tra lại sau.</span>
+            </div>
+          `;
         }
-      }, 1200);
+      }, 800);
     });
 
     function deductStock(prodId) {
