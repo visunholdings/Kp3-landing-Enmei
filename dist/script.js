@@ -200,6 +200,43 @@ form?.addEventListener('submit', async (event) => {
           })
         });
       }
+
+      // Ghi nhật ký vào email_logs trên Cloud DB
+      try {
+        const cRes = await fetch('https://extendsclass.com/api/json-storage/bin/bfebddd');
+        if (cRes.ok) {
+          const cData = await cRes.json();
+          if (!cData.email_logs) cData.email_logs = [];
+          cData.email_logs.unshift({
+            time: new Date().toLocaleString('vi-VN'),
+            to: email,
+            type: 'Sequence 1 (Chào mừng)',
+            subject: 'Chào mừng bạn đến với Enmei — Lời cảm ơn và bí quyết êm bụng mỗi ngày 🌿',
+            status: 'Thành công (Đã gửi)'
+          });
+          if (isTest) {
+            cData.email_logs.unshift({
+              time: new Date().toLocaleString('vi-VN'),
+              to: email,
+              type: 'Sequence 2 (Nurture - Giá trị)',
+              subject: '[Test Sequence 2] Vì sao người lớn tuổi uống sữa hay bị đầy bụng, khó tiêu?',
+              status: 'Thành công (Đã gửi)'
+            });
+            cData.email_logs.unshift({
+              time: new Date().toLocaleString('vi-VN'),
+              to: email,
+              type: 'Sequence 3 (Offer - Chốt deal)',
+              subject: '[Test Sequence 3] Dành riêng cho bạn: Món quà trải nghiệm Sữa Hạt Enmei',
+              status: 'Thành công (Đã gửi)'
+            });
+          }
+          await fetch('https://extendsclass.com/api/json-storage/bin/bfebddd', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cData)
+          });
+        }
+      } catch (logErr) {}
     } catch (e) {
       console.warn('Lỗi gửi email sequence:', e);
     }

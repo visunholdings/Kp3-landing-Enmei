@@ -686,6 +686,10 @@
             localStorage.setItem('enmei_crm_products', JSON.stringify(cloud.products));
             hasChange = true;
           }
+          if (cloud.email_logs && Array.isArray(cloud.email_logs)) {
+            localStorage.setItem('enmei_crm_email_logs', JSON.stringify(cloud.email_logs));
+            renderEmailLogs();
+          }
           if (hasChange) renderAll();
           
           const statusEl = document.getElementById('cloud-sync-status');
@@ -705,7 +709,8 @@
         const payload = {
           products: getProducts(),
           customers: getCustomers(),
-          orders: getOrders()
+          orders: getOrders(),
+          email_logs: getEmailLogs()
         };
         await fetch(CLOUD_DB_URL, {
           method: 'PUT',
@@ -1096,6 +1101,7 @@
       logs.unshift(logItem);
       localStorage.setItem('enmei_crm_email_logs', JSON.stringify(logs));
       renderEmailLogs();
+      pushToCloud();
     }
 
     function renderEmailLogs() {
