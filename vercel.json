@@ -1,4 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/thanh-toan", "destination": "/thanh-toan.html" },
+    { "source": "/admin", "destination": "/admin.html" }
+  ]
 }

@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel &amp; CRM | Enmei Business OS</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root {
+      --admin-bg: #f1f5f9;
+      --admin-card: #ffffff;
+      --admin-border: #e2e8f0;
+      --admin-primary: #063b80;
+      --admin-primary-hover: #0c57b8;
+      --admin-text: #0f172a;
+      --admin-muted: #64748b;
+    }
+    body.admin-body {
+      background: var(--admin-bg);
+      color: var(--admin-text);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .admin-navbar {
+      background: var(--admin-primary);
+      color: #fff;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(6, 59, 128, 0.15);
+    }
+    .admin-navbar h1 {
+      font-size: 1.25rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .admin-navbar a {
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .admin-navbar a:hover {
+      color: #fff;
+    }
+    .admin-container {
+      max-width: 1200px;
+      margin: 28px auto;
+      padding: 0 20px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--admin-card);
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid var(--admin-border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .stat-card span {
+      color: var(--admin-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .stat-card strong {
+      display: block;
+      font-size: 1.8rem;
+      color: var(--admin-primary);
+      margin-top: 6px;
+    }
+    .tabs-nav {
+      display: flex;
+      gap: 8px;
+      border-bottom: 2px solid var(--admin-border);
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      padding: 12px 20px;
+      border: none;
+      background: transparent;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--admin-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover {
+      color: var(--admin-primary);
+    }
+    .tab-btn.is-active {
+      color: var(--admin-primary);
+      border-bottom-color: var(--admin-primary);
+    }
+    .tab-panel {
+      display: none;
+    }
+    .tab-panel.is-active {
+      display: block;
+    }
+    .panel-card {
+      background: var(--admin-card);
+      border-radius: 16px;
+      border: 1px solid var(--admin-border);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+      padding: 24px;
+      overflow-x: auto;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .panel-header h2 {
+      font-size: 1.25rem;
+      margin: 0;
+      color: var(--admin-primary);
+    }
+    .btn-action {
+      background: var(--admin-primary);
+      color: #fff;
+      padding: 9px 16px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.88rem;
+      transition: background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-action:hover {
+      background: var(--admin-primary-hover);
+    }
+    .btn-success-sm {
+      background: #10b981;
+      color: #fff;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .btn-success-sm:hover {
+      background: #059669;
+    }
+    .btn-delete-sm {
+      background: #fee2e2;
+      color: #dc2626;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .btn-delete-sm:hover {
+      background: #fecaca;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+    table.data-table th {
+      background: #f8fafc;
+      padding: 12px 14px;
+      font-weight: 700;
+      color: #475569;
+      border-bottom: 1px solid var(--admin-border);
+    }
+    table.data-table td {
+      padding: 14px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+    table.data-table tr:hover td {
+      background: #f8fafc;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .badge--physical { background: #e0e7ff; color: #3730a3; }
+    .badge--digital { background: #dcfce7; color: #166534; }
+    .badge--service { background: #fef3c7; color: #92400e; }
+    .badge--pending { background: #fef3c7; color: #b45309; }
+    .badge--success { background: #d1fae5; color: #065f46; }
+    
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 16px;
+    }
+    .modal-overlay.is-visible {
+      display: flex;
+    }
+    .modal-box {
+      background: #fff;
+      border-radius: 20px;
+      max-width: 500px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+    .modal-box h3 {
+      margin: 0 0 18px 0;
+      color: var(--admin-primary);
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body class="admin-body">
+  <header class="admin-navbar">
+    <h1>
+      <span style="background:#fff; color:#063b80; padding:2px 8px; border-radius:6px; font-weight:900;">E</span>
+      Enmei CRM &amp; Admin Panel (Sepay Auto-OS)
+    </h1>
+    <div style="display:flex; gap:16px; align-items:center;">
+      <a href="/thanh-toan" target="_blank">🌐 Mở Trang Thanh Toán Sepay ↗</a>
+      <a href="/" target="_blank">🏠 Trang Chủ ↗</a>
+    </div>
+  </header>
+
+  <main class="admin-container">
+    <!-- Stat Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span>Tổng Doanh Thu</span>
+        <strong id="stat-revenue">0đ</strong>
+      </div>
+      <div class="stat-card">
+        <span>Đơn Hoàn Tất</span>
+        <strong id="stat-orders-success">0</strong>
+      </div>
+      <div class="stat-card">
+        <span>Đơn Chờ (Pending)</span>
+        <strong id="stat-orders-pending" style="color:#d97706;">0</strong>
+      </div>
+      <div class="stat-card">
+        <span>Tổng Khách Hàng</span>
+        <strong id="stat-customers">0</strong>
+      </div>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <nav class="tabs-nav" aria-label="Tabs Admin">
+      <button class="tab-btn is-active" data-tab="tab-orders">📦 Đơn Hàng (Orders)</button>
+      <button class="tab-btn" data-tab="tab-products">🏷️ Sản Phẩm (Products)</button>
+      <button class="tab-btn" data-tab="tab-customers">👥 Khách Hàng (Customers)</button>
+    </nav>
+
+    <!-- TAB 1: ĐƠN HÀNG (ORDERS) -->
+    <section id="tab-orders" class="tab-panel is-active">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <h2>Quản lý Đơn Hàng &amp; Dòng Tiền Sepay</h2>
+            <p style="margin:4px 0 0; font-size:0.85rem; color:var(--admin-muted);">
+              Đơn hàng tự động khởi tạo <code>pending</code> khi khách quét QR. Bấm nút <strong>Duyệt thành công</strong> để kích hoạt thanh toán bằng tay.
+            </p>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-action" id="btn-add-order">+ Tạo đơn hàng thủ công</button>
+            <button class="btn-action" style="background:#64748b;" onclick="resetToSampleOrders()">🔄 Nạp lại Data mẫu</button>
+          </div>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Mã Đơn</th>
+              <th>Khách Hàng</th>
+              <th>SĐT</th>
+              <th>Sản Phẩm</th>
+              <th>Số Tiền</th>
+              <th>Trạng Thái</th>
+              <th>Thời Gian</th>
+              <th>Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody id="orders-tbody">
+            <!-- Render danh sách đơn hàng -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 2: SẢN PHẨM (PRODUCTS) -->
+    <section id="tab-products" class="tab-panel">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <h2>Danh Mục Sản Phẩm (CRM Products)</h2>
+            <p style="margin:4px 0 0; font-size:0.85rem; color:var(--admin-muted);">
+              Quy tắc tồn kho: Hàng <strong>Vật lý</strong> tự động trừ tồn kho khi đơn thành công. <strong>Sản phẩm số</strong> &amp; <strong>Dịch vụ</strong> không trừ kho.
+            </p>
+          </div>
+          <button class="btn-action" id="btn-add-product">+ Thêm sản phẩm mới</button>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tên Sản Phẩm</th>
+              <th>Loại Hàng</th>
+              <th>Giá Bán</th>
+              <th>Mô Tả</th>
+              <th>Tồn Kho</th>
+              <th>Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody id="products-tbody">
+            <!-- Render danh sách sản phẩm -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 3: KHÁCH HÀNG (CUSTOMERS) -->
+    <section id="tab-customers" class="tab-panel">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div>
+            <h2>Danh Sách Khách Hàng (Waitlist CRM)</h2>
+            <p style="margin:4px 0 0; font-size:0.85rem; color:var(--admin-muted);">
+              Import tự động từ waitlist.json và các đơn hàng phát sinh trên website.
+            </p>
+          </div>
+          <button class="btn-action" id="btn-add-customer">+ Thêm khách hàng</button>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Họ và Tên</th>
+              <th>Số Điện Thoại</th>
+              <th>Zalo</th>
+              <th>Ngày Đăng Ký</th>
+              <th>Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody id="customers-tbody">
+            <!-- Render danh sách khách hàng -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL THÊM SẢN PHẨM -->
+  <div class="modal-overlay" id="modal-product">
+    <div class="modal-box">
+      <h3 id="modal-product-title">Thêm Sản Phẩm Mới</h3>
+      <form id="form-product">
+        <input type="hidden" id="prod-id" />
+        <div class="form-group">
+          <label>Tên sản phẩm *</label>
+          <input type="text" id="prod-name" required />
+        </div>
+        <div class="form-group">
+          <label>Loại sản phẩm *</label>
+          <select id="prod-type" required>
+            <option value="physical">Hàng vật lý (Có tồn kho)</option>
+            <option value="digital">Sản phẩm số (Ebook, Template... - Không trừ kho)</option>
+            <option value="service">Dịch vụ (Tư vấn, Coaching... - Không trừ kho)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Giá bán (VNĐ) *</label>
+          <input type="number" id="prod-price" required />
+        </div>
+        <div class="form-group" id="group-stock">
+          <label>Số lượng tồn kho (chỉ cho hàng vật lý)</label>
+          <input type="number" id="prod-stock" value="100" />
+        </div>
+        <div class="form-group">
+          <label>Mô tả ngắn</label>
+          <input type="text" id="prod-desc" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-action" style="background:#94a3b8;" onclick="closeModals()">Hủy</button>
+          <button type="submit" class="btn-action">Lưu Sản Phẩm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL THÊM ĐƠN HÀNG THỦ CÔNG -->
+  <div class="modal-overlay" id="modal-order">
+    <div class="modal-box">
+      <h3>Tạo Đơn Hàng Mới</h3>
+      <form id="form-order">
+        <div class="form-group">
+          <label>Tên khách hàng *</label>
+          <input type="text" id="ord-cust-name" required />
+        </div>
+        <div class="form-group">
+          <label>Số điện thoại *</label>
+          <input type="tel" id="ord-cust-phone" required />
+        </div>
+        <div class="form-group">
+          <label>Sản phẩm chọn mua *</label>
+          <select id="ord-prod-select" required></select>
+        </div>
+        <div class="form-group">
+          <label>Trạng thái đơn hàng</label>
+          <select id="ord-status">
+            <option value="pending">Chờ thanh toán (pending)</option>
+            <option value="success">Thành công (success - tự trừ kho nếu vật lý)</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-action" style="background:#94a3b8;" onclick="closeModals()">Hủy</button>
+          <button type="submit" class="btn-action">Tạo Đơn Hàng</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL THÊM KHÁCH HÀNG -->
+  <div class="modal-overlay" id="modal-customer">
+    <div class="modal-box">
+      <h3>Thêm Khách Hàng Mới</h3>
+      <form id="form-customer">
+        <div class="form-group">
+          <label>Họ và tên *</label>
+          <input type="text" id="cust-new-name" required />
+        </div>
+        <div class="form-group">
+          <label>Số điện thoại *</label>
+          <input type="tel" id="cust-new-phone" required />
+        </div>
+        <div class="form-group">
+          <label>Zalo</label>
+          <input type="text" id="cust-new-zalo" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-action" style="background:#94a3b8;" onclick="closeModals()">Hủy</button>
+          <button type="submit" class="btn-action">Lưu Khách Hàng</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Dữ liệu hạt giống mặc định từ SQLite brain.db
+    const SEED_PRODUCTS = [
+      { id: 1, name: 'Enmei Diabetes Care 850g', type: 'physical', price: 590000, desc: 'Dinh dưỡng tiểu đường êm bụng từ đạm thực vật, GI < 35', stock: 100 },
+      { id: 2, name: 'Enmei Gold Elder 850g', type: 'physical', price: 590000, desc: 'Phục hồi thể lực, CaHMB chống teo cơ người lớn tuổi', stock: 85 },
+      { id: 3, name: 'Enmei Bone+ 850g', type: 'physical', price: 590000, desc: 'Canxi Nano, D3, MK7 và Collagen Type II cho sụn khớp', stock: 70 },
+      { id: 4, name: 'Cẩm Nang Dinh Dưỡng Đường Huyết 14 Ngày (Ebook PDF)', type: 'digital', price: 2000, desc: 'Tài liệu hướng dẫn dinh dưỡng & thực đơn khoa học cho người tiểu đường', stock: null },
+      { id: 5, name: 'Gói Đồng Hành Tư Vấn Đường Huyết 1-1 (30 Ngày)', type: 'service', price: 490000, desc: 'Dịch vụ chuyên gia dinh dưỡng theo dõi chỉ số đường huyết hàng tuần', stock: null }
+    ];
+
+    const SEED_CUSTOMERS = [
+      { id: 1, name: 'Nguyễn Văn Tuấn', phone: '0913245678', zalo: '0913245678', created_at: '2026-09-15 09:30:00' },
+      { id: 2, name: 'Trần Thị Mai', phone: '0988765432', zalo: '0988765432', created_at: '2026-09-16 14:15:00' },
+      { id: 3, name: 'Hoàng Nam', phone: '0904112233', zalo: '0904112233', created_at: '2026-09-17 11:20:00' },
+      { id: 4, name: 'Lê Thu Hà', phone: '0975889900', zalo: '0975889900', created_at: '2026-09-18 16:45:00' },
+      { id: 5, name: 'Trịnh Minh Hùng', phone: '0946375566', zalo: '0946375566', created_at: '2026-09-19 14:00:00' }
+    ];
+
+    const SEED_ORDERS = [
+      { id: 1, order_code: 'ENM-9821', customer_name: 'Nguyễn Văn Tuấn', customer_phone: '0913245678', customer_email: 'tuan.nguyen@gmail.com', product_id: 1, product_name: 'Enmei Diabetes Care 850g', product_type: 'physical', amount: 590000, status: 'success', created_at: '2026-09-17 10:30:00' },
+      { id: 2, order_code: 'ENM-9822', customer_name: 'Trần Thị Mai', customer_phone: '0988765432', customer_email: 'mai.tran@yahoo.com', product_id: 3, product_name: 'Enmei Bone+ 850g', product_type: 'physical', amount: 590000, status: 'success', created_at: '2026-09-18 15:45:00' },
+      { id: 3, order_code: 'ENM-9823', customer_name: 'Trịnh Minh Hùng', customer_phone: '0946375566', customer_email: 'hungtrinhth@gmail.com', product_id: 4, product_name: 'Cẩm Nang Dinh Dưỡng Đường Huyết 14 Ngày (Ebook PDF)', product_type: 'digital', amount: 2000, status: 'pending', created_at: '2026-09-19 15:10:00' }
+    ];
+
+    // State
+    function getProducts() {
+      const p = localStorage.getItem('enmei_crm_products');
+      if (!p) {
+        localStorage.setItem('enmei_crm_products', JSON.stringify(SEED_PRODUCTS));
+        return SEED_PRODUCTS;
+      }
+      return JSON.parse(p);
+    }
+    function saveProducts(prods) {
+      localStorage.setItem('enmei_crm_products', JSON.stringify(prods));
+    }
+
+    function getCustomers() {
+      const c = localStorage.getItem('enmei_crm_customers');
+      if (!c) {
+        localStorage.setItem('enmei_crm_customers', JSON.stringify(SEED_CUSTOMERS));
+        return SEED_CUSTOMERS;
+      }
+      return JSON.parse(c);
+    }
+    function saveCustomers(custs) {
+      localStorage.setItem('enmei_crm_customers', JSON.stringify(custs));
+    }
+
+    function getOrders() {
+      const o = localStorage.getItem('enmei_crm_orders');
+      if (!o) {
+        localStorage.setItem('enmei_crm_orders', JSON.stringify(SEED_ORDERS));
+        return SEED_ORDERS;
+      }
+      return JSON.parse(o);
+    }
+    function saveOrders(ords) {
+      localStorage.setItem('enmei_crm_orders', JSON.stringify(ords));
+    }
+
+    function resetToSampleOrders() {
+      if (confirm('Khôi phục lại danh sách dữ liệu mẫu từ brain.db?')) {
+        localStorage.setItem('enmei_crm_products', JSON.stringify(SEED_PRODUCTS));
+        localStorage.setItem('enmei_crm_customers', JSON.stringify(SEED_CUSTOMERS));
+        localStorage.setItem('enmei_crm_orders', JSON.stringify(SEED_ORDERS));
+        renderAll();
+      }
+    }
+
+    // Tabs switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('is-active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        document.getElementById(btn.dataset.tab).classList.add('is-active');
+      });
+    });
+
+    // Render Stats
+    function updateStats() {
+      const orders = getOrders();
+      const customers = getCustomers();
+
+      const successOrders = orders.filter(o => o.status === 'success');
+      const pendingOrders = orders.filter(o => o.status === 'pending');
+      const revenue = successOrders.reduce((sum, o) => sum + (o.amount || 0), 0);
+
+      document.getElementById('stat-revenue').textContent = revenue.toLocaleString('vi-VN') + 'đ';
+      document.getElementById('stat-orders-success').textContent = successOrders.length;
+      document.getElementById('stat-orders-pending').textContent = pendingOrders.length;
+      document.getElementById('stat-customers').textContent = customers.length;
+    }
+
+    // Render Products Table
+    function renderProductsTable() {
+      const prods = getProducts();
+      const tbody = document.getElementById('products-tbody');
+      tbody.innerHTML = '';
+
+      prods.forEach(p => {
+        const tr = document.createElement('tr');
+        const stockDisplay = p.type === 'physical'
+          ? (typeof p.stock === 'number' ? `<strong>${p.stock}</strong> lon` : '0 lon')
+          : '<span style="color:#64748b;">Không giới hạn</span>';
+
+        tr.innerHTML = `
+          <td>#${p.id}</td>
+          <td><strong>${p.name}</strong></td>
+          <td><span class="badge badge--${p.type}">${p.type === 'physical' ? 'Hàng vật lý' : (p.type === 'digital' ? 'Sản phẩm số' : 'Dịch vụ')}</span></td>
+          <td><strong style="color:var(--admin-primary);">${p.price.toLocaleString('vi-VN')}đ</strong></td>
+          <td style="max-width:280px; color:#475569; font-size:0.85rem;">${p.desc || ''}</td>
+          <td>${stockDisplay}</td>
+          <td>
+            <button class="btn-success-sm" style="background:#3b82f6;" onclick="editProduct(${p.id})">Sửa</button>
+            <button class="btn-delete-sm" onclick="deleteProduct(${p.id})">Xóa</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Render Customers Table
+    function renderCustomersTable() {
+      const custs = getCustomers();
+      const tbody = document.getElementById('customers-tbody');
+      tbody.innerHTML = '';
+
+      custs.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>#${c.id}</td>
+          <td><strong>${c.name}</strong></td>
+          <td><a href="tel:${c.phone}" style="color:var(--admin-primary); font-weight:600; text-decoration:none;">${c.phone}</a></td>
+          <td>${c.zalo || c.phone}</td>
+          <td style="color:#64748b; font-size:0.85rem;">${c.created_at || ''}</td>
+          <td>
+            <button class="btn-delete-sm" onclick="deleteCustomer(${c.id})">Xóa</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Render Orders Table
+    function renderOrdersTable() {
+      const orders = getOrders();
+      const tbody = document.getElementById('orders-tbody');
+      tbody.innerHTML = '';
+
+      orders.forEach(o => {
+        const tr = document.createElement('tr');
+        const isPending = o.status === 'pending';
+        const statusBadge = isPending
+          ? '<span class="badge badge--pending">Chờ chuyển khoản (pending)</span>'
+          : (o.status === 'success' ? '<span class="badge badge--success">Thành công (success)</span>' : '<span class="badge" style="background:#f1f5f9;">Đã hủy</span>');
+
+        const actionHtml = isPending
+          ? `<button class="btn-success-sm" onclick="markOrderSuccess('${o.order_code}')" title="Kích hoạt thành công bằng tay nếu nội dung CK bị lệch">✓ Duyệt thành công</button>
+             <button class="btn-delete-sm" onclick="deleteOrder('${o.order_code}')">Xóa</button>`
+          : `<span style="color:#10b981; font-weight:700; font-size:0.85rem;">Đã thanh toán</span>
+             <button class="btn-delete-sm" style="margin-left:6px;" onclick="deleteOrder('${o.order_code}')">Xóa</button>`;
+
+        tr.innerHTML = `
+          <td><code style="font-weight:700; color:#063b80;">${o.order_code}</code></td>
+          <td><strong>${o.customer_name}</strong></td>
+          <td>${o.customer_phone}</td>
+          <td>${o.product_name}</td>
+          <td><strong style="color:#d90429;">${(o.amount||0).toLocaleString('vi-VN')}đ</strong></td>
+          <td>${statusBadge}</td>
+          <td style="color:#64748b; font-size:0.82rem;">${o.created_at || ''}</td>
+          <td>${actionHtml}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Mark Order Success (Duyệt thành công bằng tay)
+    window.markOrderSuccess = function(orderCode) {
+      let orders = getOrders();
+      const idx = orders.findIndex(o => o.order_code === orderCode);
+      if (idx !== -1) {
+        orders[idx].status = 'success';
+        saveOrders(orders);
+
+        // Quy tắc quan trọng: Chỉ trừ tồn kho nếu sản phẩm vật lý (physical)
+        const prods = getProducts();
+        const p = prods.find(item => item.id === orders[idx].product_id || item.name === orders[idx].product_name);
+        if (p && p.type === 'physical') {
+          if (typeof p.stock === 'number' && p.stock > 0) {
+            p.stock -= 1;
+            saveProducts(prods);
+          }
+        }
+        renderAll();
+      }
+    };
+
+    window.deleteOrder = function(orderCode) {
+      if (confirm('Bạn chắc chắn muốn xóa đơn hàng này?')) {
+        let orders = getOrders().filter(o => o.order_code !== orderCode);
+        saveOrders(orders);
+        renderAll();
+      }
+    };
+
+    window.deleteCustomer = function(id) {
+      if (confirm('Bạn chắc chắn muốn xóa khách hàng này?')) {
+        let custs = getCustomers().filter(c => c.id !== id);
+        saveCustomers(custs);
+        renderAll();
+      }
+    };
+
+    window.deleteProduct = function(id) {
+      if (confirm('Bạn chắc chắn muốn xóa sản phẩm này?')) {
+        let prods = getProducts().filter(p => p.id !== id);
+        saveProducts(prods);
+        renderAll();
+      }
+    };
+
+    window.editProduct = function(id) {
+      const p = getProducts().find(item => item.id === id);
+      if (!p) return;
+      document.getElementById('prod-id').value = p.id;
+      document.getElementById('prod-name').value = p.name;
+      document.getElementById('prod-type').value = p.type;
+      document.getElementById('prod-price').value = p.price;
+      document.getElementById('prod-desc').value = p.desc || '';
+      document.getElementById('prod-stock').value = p.stock || 0;
+      document.getElementById('modal-product-title').textContent = 'Chỉnh Sửa Sản Phẩm';
+      document.getElementById('modal-product').classList.add('is-visible');
+    };
+
+    function renderAll() {
+      updateStats();
+      renderProductsTable();
+      renderCustomersTable();
+      renderOrdersTable();
+    }
+
+    renderAll();
+
+    // Modals Handling
+    window.closeModals = function() {
+      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('is-visible'));
+    };
+
+    document.getElementById('btn-add-product').onclick = () => {
+      document.getElementById('form-product').reset();
+      document.getElementById('prod-id').value = '';
+      document.getElementById('modal-product-title').textContent = 'Thêm Sản Phẩm Mới';
+      document.getElementById('modal-product').classList.add('is-visible');
+    };
+
+    document.getElementById('prod-type').onchange = function() {
+      const groupStock = document.getElementById('group-stock');
+      groupStock.style.display = this.value === 'physical' ? 'block' : 'none';
+    };
+
+    document.getElementById('form-product').onsubmit = function(e) {
+      e.preventDefault();
+      const idVal = document.getElementById('prod-id').value;
+      const name = document.getElementById('prod-name').value.trim();
+      const type = document.getElementById('prod-type').value;
+      const price = parseInt(document.getElementById('prod-price').value, 10);
+      const desc = document.getElementById('prod-desc').value.trim();
+      const stock = type === 'physical' ? parseInt(document.getElementById('prod-stock').value || 0, 10) : null;
+
+      let prods = getProducts();
+      if (idVal) {
+        const idx = prods.findIndex(p => p.id == idVal);
+        if (idx !== -1) {
+          prods[idx] = { ...prods[idx], name, type, price, desc, stock };
+        }
+      } else {
+        prods.push({ id: Date.now(), name, type, price, desc, stock });
+      }
+      saveProducts(prods);
+      closeModals();
+      renderAll();
+    };
+
+    // Add Order Modal
+    document.getElementById('btn-add-order').onclick = () => {
+      const select = document.getElementById('ord-prod-select');
+      select.innerHTML = '';
+      getProducts().forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.name} (${p.price.toLocaleString('vi-VN')}đ) - ${p.type}`;
+        select.appendChild(opt);
+      });
+      document.getElementById('modal-order').classList.add('is-visible');
+    };
+
+    document.getElementById('form-order').onsubmit = function(e) {
+      e.preventDefault();
+      const custName = document.getElementById('ord-cust-name').value.trim();
+      const custPhone = document.getElementById('ord-cust-phone').value.trim();
+      const prodId = parseInt(document.getElementById('ord-prod-select').value, 10);
+      const status = document.getElementById('ord-status').value;
+
+      const prod = getProducts().find(p => p.id === prodId);
+      if (!prod) return;
+
+      const orderCode = 'ENM' + Math.floor(1000 + Math.random() * 9000);
+      const newOrder = {
+        id: Date.now(),
+        order_code: orderCode,
+        customer_name: custName,
+        customer_phone: custPhone,
+        product_id: prod.id,
+        product_name: prod.name,
+        product_type: prod.type,
+        amount: prod.price,
+        status: status,
+        created_at: new Date().toLocaleString('vi-VN')
+      };
+
+      let orders = getOrders();
+      orders.unshift(newOrder);
+      saveOrders(orders);
+
+      // Nếu đơn là success và hàng là physical thì trừ tồn kho
+      if (status === 'success' && prod.type === 'physical') {
+        let prods = getProducts();
+        const pIdx = prods.findIndex(p => p.id === prod.id);
+        if (pIdx !== -1 && typeof prods[pIdx].stock === 'number') {
+          prods[pIdx].stock = Math.max(0, prods[pIdx].stock - 1);
+          saveProducts(prods);
+        }
+      }
+
+      closeModals();
+      renderAll();
+    };
+
+    // Add Customer Modal
+    document.getElementById('btn-add-customer').onclick = () => {
+      document.getElementById('form-customer').reset();
+      document.getElementById('modal-customer').classList.add('is-visible');
+    };
+
+    document.getElementById('form-customer').onsubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('cust-new-name').value.trim();
+      const phone = document.getElementById('cust-new-phone').value.trim();
+      const zalo = document.getElementById('cust-new-zalo').value.trim() || phone;
+
+      let custs = getCustomers();
+      custs.unshift({ id: Date.now(), name, phone, zalo, created_at: new Date().toLocaleString('vi-VN') });
+      saveCustomers(custs);
+      closeModals();
+      renderAll();
+    };
+
+    // Tự động lắng nghe thay đổi giữa các tab (ví dụ thanh toán ở tab khác thì admin tự cập nhật ngay)
+    window.addEventListener('storage', () => {
+      renderAll();
+    });
+  </script>
+</body>
+</html>
