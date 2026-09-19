@@ -363,7 +363,7 @@
 
     // Submit Order Form
     const orderForm = document.getElementById('order-form');
-    orderForm.addEventListener('submit', function(e) {
+    orderForm.addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const nameInput = document.getElementById('cust-name');
@@ -417,19 +417,21 @@
         created_at: new Date().toLocaleString('vi-VN')
       };
 
-      // Save order to CRM storage
-      saveOrderToStorage(currentOrder);
+      // Save order to CRM storage and sync to Cloud Database
+      await saveOrderToStorage(currentOrder);
 
       // Render Sepay VietQR
       displaySepayQR(currentOrder);
     });
 
-    function saveOrderToStorage(order) {
+    const CLOUD_DB_URL = 'https://extendsclass.com/api/json-storage/bin/bfebddd';
+
+    async function saveOrderToStorage(order) {
+      // 1. Lưu Local fallback
       let orders = JSON.parse(localStorage.getItem('enmei_crm_orders') || '[]');
       orders.unshift(order);
       localStorage.setItem('enmei_crm_orders', JSON.stringify(orders));
 
-      // Also ensure customer is saved in customers list
       let customers = JSON.parse(localStorage.getItem('enmei_crm_customers') || '[]');
       const exists = customers.find(c => c.phone === order.customer_phone);
       if (!exists) {
@@ -437,10 +439,44 @@
           id: Date.now(),
           name: order.customer_name,
           phone: order.customer_phone,
-          zalo: order.customer_phone,
+          email: order.customer_email,
+          tier: 'lead',
+          total_spent: order.amount,
           created_at: new Date().toLocaleString('vi-VN')
         });
         localStorage.setItem('enmei_crm_customers', JSON.stringify(customers));
+      }
+
+      // 2. Đồng bộ lên Cloud DB ngay lập tức (Dùng chung cho mọi trình duyệt, kể cả ẩn danh)
+      try {
+        const res = await fetch(CLOUD_DB_URL);
+        if (res.ok) {
+          const cloudData = await res.json();
+          if (!cloudData.orders) cloudData.orders = [];
+          if (!cloudData.customers) cloudData.customers = [];
+
+          cloudData.orders.unshift(order);
+
+          if (!cloudData.customers.some(c => c.phone === order.customer_phone)) {
+            cloudData.customers.unshift({
+              id: Date.now(),
+              name: order.customer_name,
+              phone: order.customer_phone,
+              email: order.customer_email,
+              tier: 'lead',
+              total_spent: order.amount,
+              created_at: new Date().toLocaleString('vi-VN')
+            });
+          }
+
+          await fetch(CLOUD_DB_URL, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cloudData)
+          });
+        }
+      } catch (err) {
+        console.warn('Lỗi đồng bộ Cloud DB:', err);
       }
     }
 
@@ -492,7 +528,7 @@
       btn.disabled = true;
       btn.textContent = 'Đang đồng bộ giao dịch ngân hàng...';
 
-      setTimeout(() => {
+      setTimeout(async () => {
         let orders = JSON.parse(localStorage.getItem('enmei_crm_orders') || '[]');
         const idx = orders.findIndex(o => o.order_code === currentOrder.order_code);
         if (idx !== -1) {
@@ -505,6 +541,27 @@
           }
 
           showSuccessView(orders[idx]);
+
+          // Cập nhật trạng thái lên Cloud DB
+          try {
+            const res = await fetch(CLOUD_DB_URL);
+            if (res.ok) {
+              const cloudData = await res.json();
+              const cIdx = (cloudData.orders || []).findIndex(o => o.order_code === currentOrder.order_code);
+              if (cIdx !== -1) {
+                cloudData.orders[cIdx].status = 'success';
+                if (orders[idx].product_type === 'physical') {
+                  const p = (cloudData.products || []).find(prod => prod.id === orders[idx].product_id);
+                  if (p && typeof p.stock === 'number' && p.stock > 0) p.stock -= 1;
+                }
+                await fetch(CLOUD_DB_URL, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(cloudData)
+                });
+              }
+            }
+          } catch(e) {}
         }
       }, 1200);
     });
