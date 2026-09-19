@@ -249,9 +249,9 @@
           </div>
 
           <div class="bank-info">
-            <div><span>Ngân hàng:</span> <strong>MBBank (Quân Đội)</strong></div>
-            <div><span>Số tài khoản:</span> <span class="copy-tag" id="bank-acc">0946375566</span></div>
-            <div><span>Chủ tài khoản:</span> <strong>TRINH MINH HUNG</strong></div>
+            <div><span>Ngân hàng:</span> <strong>Techcombank</strong></div>
+            <div><span>Số tài khoản:</span> <span class="copy-tag" id="bank-acc">19034982625011</span></div>
+            <div><span>Chủ tài khoản:</span> <strong>Trịnh Minh Hùng</strong></div>
             <div><span>Số tiền:</span> <strong style="color:#d90429;" id="bank-amount">0đ</strong></div>
             <div><span>Nội dung CK:</span> <span class="copy-tag" style="color:#d90429; font-size:1rem;" id="bank-des">ENM...</span></div>
           </div>
@@ -449,8 +449,8 @@
       document.getElementById('qr-box').style.display = 'block';
 
       // Sepay VietQR format: https://qr.sepay.vn/img?acc=[ACC]&bank=[BANK]&amount=[AMOUNT]&des=[DES]
-      const bankAcc = '0946375566';
-      const bankCode = 'MBBank';
+      const bankAcc = '19034982625011';
+      const bankCode = 'Techcombank';
       const sepayQrUrl = `https://qr.sepay.vn/img?acc=${bankAcc}&bank=${bankCode}&amount=${order.amount}&des=${order.order_code}`;
 
       document.getElementById('sepay-qr-img').src = sepayQrUrl;
